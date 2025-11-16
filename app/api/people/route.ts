@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { getTripIdFromRequest } from '@/lib/trip-context'
 
 // 獲取所有人員
-export async function GET() {
+export async function GET(request: Request) {
+  const tripId = getTripIdFromRequest(request)
+
   const { data, error } = await supabase
     .from('people')
     .select('*')
+    .eq('trip_id', tripId)
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -19,11 +23,18 @@ export async function GET() {
 
 // 新增人員
 export async function POST(request: Request) {
+  const tripId = getTripIdFromRequest(request)
   const body = await request.json()
+
+  // 自動加上 trip_id
+  const dataWithTripId = {
+    ...body,
+    trip_id: tripId
+  }
 
   const { data, error } = await supabase
     .from('people')
-    .insert([body])
+    .insert([dataWithTripId])
     .select()
     .single()
 
