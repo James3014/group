@@ -3,36 +3,55 @@ import { supabase } from '@/lib/supabase'
 
 // 獲取所有交通安排
 export async function GET() {
-  const { data: transports, error } = await supabase
-    .from('transport')
-    .select('*, driver:people(name)')
-    .order('departure_time', { ascending: true })
+  try {
+    console.log('開始查詢交通工具...')
 
-  if (error) {
-    console.error('Transport API 錯誤:', error.message)
+    const { data: transports, error } = await supabase
+      .from('transport')
+      .select('*, driver:people(name)')
+      .order('departure_time', { ascending: true })
+
+    if (error) {
+      console.error('Transport GET 錯誤:', error)
+      console.error('錯誤詳情:', JSON.stringify(error, null, 2))
+      return NextResponse.json([])
+    }
+
+    console.log(`查詢到 ${transports?.length || 0} 筆交通工具`)
+
+    if (!transports || transports.length === 0) {
+      console.log('沒有交通工具資料，返回空陣列')
+      return NextResponse.json([])
+    }
+
+    console.log('開始載入乘客資料...')
+
+    // 獲取每個交通工具的乘客
+    const transportsWithPassengers = await Promise.all(
+      transports.map(async (transport) => {
+        const { data: passengers, error: passengerError } = await supabase
+          .from('transport_passengers')
+          .select('person_id')
+          .eq('transport_id', transport.id)
+
+        if (passengerError) {
+          console.error(`載入交通工具 ${transport.id} 的乘客時出錯:`, passengerError)
+        }
+
+        return {
+          ...transport,
+          passenger_ids: passengers?.map(p => p.person_id) || []
+        }
+      })
+    )
+
+    console.log(`成功返回 ${transportsWithPassengers.length} 筆交通工具（含乘客資料）`)
+    return NextResponse.json(transportsWithPassengers)
+  } catch (err: any) {
+    console.error('GET /api/transport 發生錯誤:', err)
+    console.error('錯誤堆疊:', err.stack)
     return NextResponse.json([])
   }
-
-  if (!transports || transports.length === 0) {
-    return NextResponse.json([])
-  }
-
-  // 獲取每個交通工具的乘客
-  const transportsWithPassengers = await Promise.all(
-    transports.map(async (transport) => {
-      const { data: passengers } = await supabase
-        .from('transport_passengers')
-        .select('person_id')
-        .eq('transport_id', transport.id)
-
-      return {
-        ...transport,
-        passenger_ids: passengers?.map(p => p.person_id) || []
-      }
-    })
-  )
-
-  return NextResponse.json(transportsWithPassengers)
 }
 
 // 新增交通安排
