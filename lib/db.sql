@@ -11,6 +11,7 @@ CREATE TABLE people (
   age_group VARCHAR(20) DEFAULT 'adult',       -- 'adult' (大人) or 'child' (小孩)
   equipment VARCHAR(20) DEFAULT 'rental',      -- 'own' (自備) or 'rental' (租借)
   has_radio BOOLEAN DEFAULT false,             -- 是否有無線電
+  parent_id INT REFERENCES people(id) ON DELETE SET NULL,  -- 家長 ID（僅小孩適用）
   is_admin BOOLEAN DEFAULT false,
   is_confirmed BOOLEAN DEFAULT false,
   created_at TIMESTAMP DEFAULT NOW()

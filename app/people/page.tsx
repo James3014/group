@@ -16,6 +16,7 @@ export default function PeoplePage() {
     age_group: 'adult' as AgeGroup,
     equipment: 'own' as Equipment,
     has_radio: true,
+    parent_id: undefined as number | undefined,
   })
 
   useEffect(() => {
@@ -37,7 +38,8 @@ export default function PeoplePage() {
       board_type: 'snowboard',
       age_group: 'adult',
       equipment: 'own',
-      has_radio: true
+      has_radio: true,
+      parent_id: undefined
     })
     setEditingId(null)
   }
@@ -75,6 +77,7 @@ export default function PeoplePage() {
       age_group: person.age_group,
       equipment: person.equipment,
       has_radio: person.has_radio,
+      parent_id: person.parent_id,
     })
     setEditingId(person.id)
     setShowForm(true)
@@ -177,13 +180,38 @@ export default function PeoplePage() {
             <label className="block mb-1 font-bold">年齡</label>
             <select
               value={formData.age_group}
-              onChange={e => setFormData({ ...formData, age_group: e.target.value as AgeGroup })}
+              onChange={e => {
+                const newAgeGroup = e.target.value as AgeGroup
+                setFormData({
+                  ...formData,
+                  age_group: newAgeGroup,
+                  parent_id: newAgeGroup === 'adult' ? undefined : formData.parent_id
+                })
+              }}
               className="w-full p-2 border rounded"
             >
               <option value="adult">大人</option>
               <option value="child">小孩</option>
             </select>
           </div>
+          {formData.age_group === 'child' && (
+            <div className="mb-3">
+              <label className="block mb-1 font-bold">家長</label>
+              <select
+                value={formData.parent_id || ''}
+                onChange={e => setFormData({ ...formData, parent_id: e.target.value ? parseInt(e.target.value) : undefined })}
+                className="w-full p-2 border rounded"
+              >
+                <option value="">未指定家長</option>
+                {people
+                  .filter(p => p.age_group === 'adult' && p.id !== editingId)
+                  .map(adult => (
+                    <option key={adult.id} value={adult.id}>{adult.name}</option>
+                  ))}
+              </select>
+              <p className="text-xs text-gray-500 mt-1">選擇此小孩的監護家長</p>
+            </div>
+          )}
           <div className="mb-3">
             <label className="block mb-1 font-bold">裝備</label>
             <select
@@ -227,6 +255,11 @@ export default function PeoplePage() {
                   {person.age_group === 'child' && ' 👶'}
                 </h3>
                 <p className="text-sm text-gray-600">{person.phone || '未填寫電話'}</p>
+                {person.parent_id && (
+                  <p className="text-sm text-gray-500">
+                    家長：{people.find(p => p.id === person.parent_id)?.name || '未知'}
+                  </p>
+                )}
                 <div className="flex gap-3 text-sm mt-1 flex-wrap">
                   <span>
                     {person.ski_level === 'beginner' && '初級'}
