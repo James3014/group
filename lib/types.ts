@@ -43,7 +43,6 @@ export interface Transport {
   driver?: Person
   seats: number
   departure_time: string
-  departure_location: string
   passenger_ids?: number[]
 }
 
@@ -62,4 +61,13 @@ export interface Task {
   assignee?: Person
   is_completed: boolean
   created_at: string
+}
+
+export interface TripSettings {
+  id: number
+  start_date: string
+  end_date: string
+  location: string
+  notes?: string
+  created_at?: string
 }

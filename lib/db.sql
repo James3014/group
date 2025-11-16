@@ -81,6 +81,16 @@ CREATE TABLE tasks (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- 行程設定表
+CREATE TABLE trip_settings (
+  id SERIAL PRIMARY KEY,
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  location VARCHAR(100) DEFAULT '神居滑雪場',
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
 -- 創建索引（只在必要的地方）
 CREATE INDEX idx_announcements_created_at ON announcements(created_at DESC);
 CREATE INDEX idx_tasks_completed ON tasks(is_completed);

@@ -7,6 +7,10 @@ export default function HomePage() {
       </header>
 
       <nav className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+        <a href="/trip-settings" className="p-6 bg-white rounded-lg shadow hover:shadow-lg transition">
+          <div className="text-3xl mb-2">⛷️</div>
+          <h2 className="font-bold">行程設定</h2>
+        </a>
         <a href="/people" className="p-6 bg-white rounded-lg shadow hover:shadow-lg transition">
           <div className="text-3xl mb-2">👥</div>
           <h2 className="font-bold">人員管理</h2>
