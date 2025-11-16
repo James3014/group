@@ -13,6 +13,7 @@ export interface Person {
   board_type: BoardType
   age_group: AgeGroup
   equipment: Equipment
+  has_radio: boolean
   is_admin: boolean
   is_confirmed: boolean
   created_at?: string

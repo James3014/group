@@ -27,6 +27,7 @@ export default function GroupsPage() {
   const snowboardCount = people.filter(p => p.board_type === 'snowboard').length
   const rentalCount = people.filter(p => p.equipment === 'rental').length
   const childCount = people.filter(p => p.age_group === 'child').length
+  const radioCount = people.filter(p => p.has_radio).length
 
   if (loading) return <div className="p-4">載入中...</div>
 
@@ -39,7 +40,7 @@ export default function GroupsPage() {
       </div>
 
       {/* 統計資訊 */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
         <div className="bg-white p-4 rounded-lg shadow text-center">
           <p className="text-2xl font-bold">🎿 {skiCount}</p>
           <p className="text-sm text-gray-600">雙板</p>
@@ -55,6 +56,10 @@ export default function GroupsPage() {
         <div className="bg-white p-4 rounded-lg shadow text-center">
           <p className="text-2xl font-bold">👶 {childCount}</p>
           <p className="text-sm text-gray-600">小孩</p>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow text-center">
+          <p className="text-2xl font-bold">📻 {radioCount}</p>
+          <p className="text-sm text-gray-600">無線電</p>
         </div>
       </div>
 

@@ -14,6 +14,7 @@ export default function PeoplePage() {
     board_type: 'ski' as BoardType,
     age_group: 'adult' as AgeGroup,
     equipment: 'rental' as Equipment,
+    has_radio: false,
   })
 
   useEffect(() => {
@@ -40,7 +41,8 @@ export default function PeoplePage() {
       ski_level: 'beginner',
       board_type: 'ski',
       age_group: 'adult',
-      equipment: 'rental'
+      equipment: 'rental',
+      has_radio: false
     })
     setShowForm(false)
     fetchPeople()
@@ -143,6 +145,17 @@ export default function PeoplePage() {
               <option value="rental">租借</option>
             </select>
           </div>
+          <div className="mb-3">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.has_radio}
+                onChange={e => setFormData({ ...formData, has_radio: e.target.checked })}
+                className="w-4 h-4"
+              />
+              <span className="font-bold">📻 有無線電</span>
+            </label>
+          </div>
           <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
             確認新增
           </button>
@@ -158,7 +171,7 @@ export default function PeoplePage() {
                 {person.age_group === 'child' && ' 👶'}
               </h3>
               <p className="text-sm text-gray-600">{person.phone || '未填寫電話'}</p>
-              <div className="flex gap-3 text-sm mt-1">
+              <div className="flex gap-3 text-sm mt-1 flex-wrap">
                 <span>
                   {person.ski_level === 'beginner' && '初級'}
                   {person.ski_level === 'intermediate' && '中級'}
@@ -172,6 +185,12 @@ export default function PeoplePage() {
                 <span>
                   {person.equipment === 'own' ? '✓ 自備裝備' : '📦 租借裝備'}
                 </span>
+                {person.has_radio && (
+                  <>
+                    <span>|</span>
+                    <span className="text-green-600">📻 有無線電</span>
+                  </>
+                )}
               </div>
             </div>
             <div>
