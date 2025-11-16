@@ -9,8 +9,11 @@ export default function GroupsPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
-  const [filterDate, setFilterDate] = useState<string>('')
-  const [filterSession, setFilterSession] = useState<string>('all')
+
+  // 工作日期/時段（用於篩選和新增）
+  const [workingDate, setWorkingDate] = useState<string>('')
+  const [workingSession, setWorkingSession] = useState<SkiSession | ''>('')
+
   const [formData, setFormData] = useState({
     name: '',
     group_date: '',
@@ -42,8 +45,19 @@ export default function GroupsPage() {
   }
 
   function resetForm() {
-    setFormData({ name: '', group_date: '', session: '', notes: '' })
+    setFormData({
+      name: '',
+      group_date: workingDate,  // 自動帶入工作日期
+      session: workingSession,   // 自動帶入工作時段
+      notes: ''
+    })
     setEditingId(null)
+  }
+
+  function openNewGroupForm() {
+    resetForm()
+    setShowForm(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   function startEdit(group: SkiGroup) {
@@ -186,9 +200,15 @@ export default function GroupsPage() {
     }
   }
 
-  // 計算未分組的人員
+  // 計算未分組的人員（僅針對當前工作日期/時段）
+  const currentSessionGroups = groups.filter(g => {
+    if (workingDate && g.group_date !== workingDate) return false
+    if (workingSession && g.session !== workingSession) return false
+    return true
+  })
+
   const assignedPeopleIds = new Set(
-    groups.flatMap(g => g.member_ids || [])
+    currentSessionGroups.flatMap(g => g.member_ids || [])
   )
   const unassignedPeople = people.filter(p => !assignedPeopleIds.has(p.id))
 
@@ -235,10 +255,10 @@ export default function GroupsPage() {
     return sessionMap[session] || ''
   }
 
-  // 篩選組別
+  // 篩選組別（顯示當前工作時段的組別）
   const filteredGroups = groups.filter(group => {
-    if (filterDate && group.group_date !== filterDate) return false
-    if (filterSession !== 'all' && group.session !== filterSession) return false
+    if (workingDate && group.group_date !== workingDate) return false
+    if (workingSession && group.session !== workingSession) return false
     return true
   })
 
@@ -248,30 +268,73 @@ export default function GroupsPage() {
     <div className="min-h-screen p-4 max-w-6xl mx-auto">
       <div className="mb-6">
         <a href="/" className="text-blue-600 hover:underline mb-2 inline-block">← 返回首頁</a>
-        <div className="flex justify-between items-start mb-2">
+        <div className="flex justify-between items-start mb-4">
           <div>
             <h1 className="text-3xl font-bold">🏂 滑雪分組</h1>
             <p className="text-gray-600">
               自由分配成員到不同組別 | 共 {people.length} 人，{radioCount} 人有無線電
             </p>
           </div>
-          <button
-            onClick={() => {
-              if (showForm) {
-                resetForm()
-              }
-              setShowForm(!showForm)
-            }}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            {showForm ? '取消' : '+ 新增分組'}
-          </button>
+        </div>
+
+        {/* 工作日期/時段選擇器 */}
+        <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-200">
+          <h3 className="font-bold mb-3 text-blue-900">📍 當前工作時段</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <label className="block mb-1 text-sm font-bold text-blue-900">工作日期</label>
+              <input
+                type="date"
+                value={workingDate}
+                onChange={e => setWorkingDate(e.target.value)}
+                className="w-full p-2 border-2 border-blue-300 rounded font-medium"
+              />
+            </div>
+            <div>
+              <label className="block mb-1 text-sm font-bold text-blue-900">工作時段</label>
+              <select
+                value={workingSession}
+                onChange={e => setWorkingSession(e.target.value as SkiSession | '')}
+                className="w-full p-2 border-2 border-blue-300 rounded font-medium"
+              >
+                <option value="">未指定</option>
+                <option value="morning">上午</option>
+                <option value="afternoon">下午</option>
+                <option value="evening">晚上</option>
+              </select>
+            </div>
+            <div className="flex items-end">
+              <button
+                onClick={openNewGroupForm}
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-medium"
+              >
+                + 新增分組
+              </button>
+            </div>
+          </div>
+          {(workingDate || workingSession) && (
+            <div className="mt-3 text-sm text-blue-800">
+              💡 正在管理：
+              {workingDate && <span className="font-bold"> {workingDate}</span>}
+              {workingSession && <span className="font-bold"> {getSessionText(workingSession)}</span>}
+              的分組
+            </div>
+          )}
         </div>
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="mb-6 p-4 bg-white rounded-lg shadow">
-          <h3 className="font-bold mb-3">{editingId ? '編輯分組' : '新增分組'}</h3>
+        <form onSubmit={handleSubmit} className="mb-6 p-4 bg-white rounded-lg shadow border-2 border-blue-200">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="font-bold text-lg">{editingId ? '編輯分組' : '新增分組'}</h3>
+            <button
+              type="button"
+              onClick={() => { setShowForm(false); resetForm(); }}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          </div>
           <div className="mb-3">
             <label className="block mb-1 font-bold">組別名稱 *</label>
             <input
@@ -322,46 +385,13 @@ export default function GroupsPage() {
         </form>
       )}
 
-      {/* 篩選器 */}
-      <div className="mb-4 p-4 bg-white rounded-lg shadow">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div>
-            <label className="block mb-1 text-sm font-bold">篩選日期</label>
-            <input
-              type="date"
-              value={filterDate}
-              onChange={e => setFilterDate(e.target.value)}
-              className="w-full p-2 border rounded text-sm"
-            />
-          </div>
-          <div>
-            <label className="block mb-1 text-sm font-bold">篩選時段</label>
-            <select
-              value={filterSession}
-              onChange={e => setFilterSession(e.target.value)}
-              className="w-full p-2 border rounded text-sm"
-            >
-              <option value="all">全部時段</option>
-              <option value="morning">上午</option>
-              <option value="afternoon">下午</option>
-              <option value="evening">晚上</option>
-            </select>
-          </div>
-          <div className="flex items-end">
-            <button
-              onClick={() => { setFilterDate(''); setFilterSession('all'); }}
-              className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
-            >
-              清除篩選
-            </button>
-          </div>
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* 左側：分組列表 */}
         <div className="lg:col-span-2 space-y-4">
-          <h2 className="text-xl font-bold">分組列表 ({filteredGroups.length} / {groups.length} 組)</h2>
+          <h2 className="text-xl font-bold">
+            {(workingDate || workingSession) ? '當前時段分組' : '所有分組'}
+            <span className="text-gray-500 font-normal ml-2">({filteredGroups.length} 組)</span>
+          </h2>
 
           {filteredGroups.map(group => {
             const members = people.filter(p => group.member_ids?.includes(p.id))
@@ -466,54 +496,59 @@ export default function GroupsPage() {
             )
           })}
 
-          {filteredGroups.length === 0 && groups.length > 0 && (
+          {filteredGroups.length === 0 && (
             <div className="p-8 text-center text-gray-500 bg-white rounded-lg shadow">
-              沒有符合篩選條件的分組
-            </div>
-          )}
-
-          {groups.length === 0 && (
-            <div className="p-8 text-center text-gray-500 bg-white rounded-lg shadow">
-              還沒有任何分組，點擊「新增分組」開始建立
+              {(workingDate || workingSession)
+                ? '此時段還沒有分組，點擊「新增分組」開始建立'
+                : '還沒有任何分組，請先選擇工作日期/時段'}
             </div>
           )}
         </div>
 
         {/* 右側：未分組人員 */}
         <div className="space-y-4">
-          <h2 className="text-xl font-bold">未分組人員 ({unassignedPeople.length})</h2>
+          <h2 className="text-xl font-bold">
+            {(workingDate || workingSession) ? '此時段未分組' : '全部人員'}
+            <span className="text-gray-500 font-normal ml-2">({unassignedPeople.length})</span>
+          </h2>
 
           <div className="bg-white rounded-lg shadow p-4">
-            {unassignedPeople.length > 0 ? (
-              <div className="space-y-2">
-                {unassignedPeople.map(person => {
-                  const relationInfo = getRelationshipInfo(person)
-                  return (
-                    <div key={person.id} className="p-2 bg-gray-50 rounded text-sm">
-                      <p className="font-medium">
-                        {person.name}
-                        {person.age_group === 'child' && ' 👶'}
-                        {person.has_radio && ' 📻'}
-                      </p>
-                      <p className="text-xs text-gray-600">
-                        {person.ski_level === 'beginner' && '初級'}
-                        {person.ski_level === 'intermediate' && '中級'}
-                        {person.ski_level === 'advanced' && '高級'}
-                        {' | '}
-                        {person.board_type === 'ski' ? '雙板' : '單板'}
-                      </p>
-                      {relationInfo && (
-                        <p className="text-xs text-blue-600 mt-1">
-                          {relationInfo}
+            {(workingDate || workingSession) ? (
+              unassignedPeople.length > 0 ? (
+                <div className="space-y-2">
+                  {unassignedPeople.map(person => {
+                    const relationInfo = getRelationshipInfo(person)
+                    return (
+                      <div key={person.id} className="p-2 bg-gray-50 rounded text-sm">
+                        <p className="font-medium">
+                          {person.name}
+                          {person.age_group === 'child' && ' 👶'}
+                          {person.has_radio && ' 📻'}
                         </p>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
+                        <p className="text-xs text-gray-600">
+                          {person.ski_level === 'beginner' && '初級'}
+                          {person.ski_level === 'intermediate' && '中級'}
+                          {person.ski_level === 'advanced' && '高級'}
+                          {' | '}
+                          {person.board_type === 'ski' ? '雙板' : '單板'}
+                        </p>
+                        {relationInfo && (
+                          <p className="text-xs text-blue-600 mt-1">
+                            {relationInfo}
+                          </p>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <p className="text-gray-400 text-sm text-center py-4">
+                  此時段所有人員都已分組 ✓
+                </p>
+              )
             ) : (
               <p className="text-gray-400 text-sm text-center py-4">
-                所有人員都已分組 ✓
+                請先選擇工作日期/時段
               </p>
             )}
           </div>
@@ -521,10 +556,10 @@ export default function GroupsPage() {
           <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
             <p className="font-bold text-sm mb-1">💡 使用提示</p>
             <ul className="text-xs text-gray-700 space-y-1">
-              <li>• 點擊「新增分組」建立組別</li>
-              <li>• 在每組下方選擇成員添加到該組</li>
-              <li>• 點擊成員旁的 ✕ 可移除成員</li>
-              <li>• 未分組人員會顯示在右側</li>
+              <li>• 選擇工作日期和時段後開始分組</li>
+              <li>• 同一個人可以在不同時段分到不同組</li>
+              <li>• 未分組人員僅顯示當前時段還沒分的人</li>
+              <li>• 點擊「複製」可快速複製組別到其他時段</li>
             </ul>
           </div>
         </div>
