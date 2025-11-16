@@ -118,6 +118,35 @@ export default function GroupsPage() {
   // 統計資訊
   const radioCount = people.filter(p => p.has_radio).length
 
+  // 獲取親子關係資訊
+  function getRelationshipInfo(person: Person): string {
+    const relations: string[] = []
+
+    // 如果是小孩，顯示父母
+    if (person.age_group === 'child') {
+      if (person.father_id) {
+        const father = people.find(p => p.id === person.father_id)
+        if (father) relations.push(`👨 ${father.name}`)
+      }
+      if (person.mother_id) {
+        const mother = people.find(p => p.id === person.mother_id)
+        if (mother) relations.push(`👩 ${mother.name}`)
+      }
+    }
+
+    // 如果是大人，顯示子女
+    if (person.age_group === 'adult') {
+      const children = people.filter(p =>
+        p.father_id === person.id || p.mother_id === person.id
+      )
+      if (children.length > 0) {
+        relations.push(`👶 ${children.map(c => c.name).join('、')}`)
+      }
+    }
+
+    return relations.join(' | ')
+  }
+
   if (loading) return <div className="p-4">載入中...</div>
 
   return (
@@ -226,23 +255,33 @@ export default function GroupsPage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3">
-                  {members.map(person => (
-                    <div key={person.id} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
-                      <span>
-                        {person.name}
-                        {person.age_group === 'child' && ' 👶'}
-                        {person.has_radio && ' 📻'}
-                      </span>
-                      <button
-                        onClick={() => removeMemberFromGroup(group.id, person.id)}
-                        className="text-red-600 hover:text-red-800 text-xs"
-                        title="移除"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
+                  {members.map(person => {
+                    const relationInfo = getRelationshipInfo(person)
+                    return (
+                      <div key={person.id} className="flex items-start justify-between p-2 bg-gray-50 rounded text-sm">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium">
+                            {person.name}
+                            {person.age_group === 'child' && ' 👶'}
+                            {person.has_radio && ' 📻'}
+                          </p>
+                          {relationInfo && (
+                            <p className="text-xs text-gray-600 mt-0.5 truncate" title={relationInfo}>
+                              {relationInfo}
+                            </p>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => removeMemberFromGroup(group.id, person.id)}
+                          className="text-red-600 hover:text-red-800 text-xs ml-2 flex-shrink-0"
+                          title="移除"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )
+                  })}
                   {members.length === 0 && (
                     <p className="col-span-full text-gray-400 text-sm">尚無成員</p>
                   )}
@@ -287,22 +326,30 @@ export default function GroupsPage() {
           <div className="bg-white rounded-lg shadow p-4">
             {unassignedPeople.length > 0 ? (
               <div className="space-y-2">
-                {unassignedPeople.map(person => (
-                  <div key={person.id} className="p-2 bg-gray-50 rounded text-sm">
-                    <p className="font-medium">
-                      {person.name}
-                      {person.age_group === 'child' && ' 👶'}
-                      {person.has_radio && ' 📻'}
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      {person.ski_level === 'beginner' && '初級'}
-                      {person.ski_level === 'intermediate' && '中級'}
-                      {person.ski_level === 'advanced' && '高級'}
-                      {' | '}
-                      {person.board_type === 'ski' ? '雙板' : '單板'}
-                    </p>
-                  </div>
-                ))}
+                {unassignedPeople.map(person => {
+                  const relationInfo = getRelationshipInfo(person)
+                  return (
+                    <div key={person.id} className="p-2 bg-gray-50 rounded text-sm">
+                      <p className="font-medium">
+                        {person.name}
+                        {person.age_group === 'child' && ' 👶'}
+                        {person.has_radio && ' 📻'}
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        {person.ski_level === 'beginner' && '初級'}
+                        {person.ski_level === 'intermediate' && '中級'}
+                        {person.ski_level === 'advanced' && '高級'}
+                        {' | '}
+                        {person.board_type === 'ski' ? '雙板' : '單板'}
+                      </p>
+                      {relationInfo && (
+                        <p className="text-xs text-blue-600 mt-1">
+                          {relationInfo}
+                        </p>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             ) : (
               <p className="text-gray-400 text-sm text-center py-4">
