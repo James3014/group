@@ -16,8 +16,10 @@ export interface Person {
   has_radio: boolean
   is_admin: boolean
   is_confirmed: boolean
-  parent_id?: number  // 家長的 ID（僅小孩適用）
-  parent?: Person     // 家長資訊（查詢時回傳）
+  father_id?: number  // 父親的 ID（僅小孩適用）
+  mother_id?: number  // 母親的 ID（僅小孩適用）
+  father?: Person     // 父親資訊（查詢時回傳）
+  mother?: Person     // 母親資訊（查詢時回傳）
   created_at?: string
 }
 
