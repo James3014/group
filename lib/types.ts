@@ -1,4 +1,4 @@
-// 核心数据类型 - 简单、直接、无废话
+// 核心資料類型 - 簡單、直接、無廢話
 
 export type SkiLevel = 'beginner' | 'intermediate' | 'advanced'
 export type BoardType = 'ski' | 'snowboard'

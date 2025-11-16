@@ -60,15 +60,15 @@ export default function PeoplePage() {
   const confirmed = people.filter(p => p.is_confirmed).length
   const total = people.length
 
-  if (loading) return <div className="p-4">加载中...</div>
+  if (loading) return <div className="p-4">載入中...</div>
 
   return (
     <div className="min-h-screen p-4 max-w-4xl mx-auto">
       <div className="mb-6">
-        <a href="/" className="text-blue-600 hover:underline mb-2 inline-block">← 返回首页</a>
-        <h1 className="text-3xl font-bold mb-2">👥 人员管理</h1>
+        <a href="/" className="text-blue-600 hover:underline mb-2 inline-block">← 返回首頁</a>
+        <h1 className="text-3xl font-bold mb-2">👥 人員管理</h1>
         <p className="text-gray-600">
-          已确认：{confirmed}/{total} 人
+          已確認：{confirmed}/{total} 人
         </p>
       </div>
 
@@ -76,7 +76,7 @@ export default function PeoplePage() {
         onClick={() => setShowForm(!showForm)}
         className="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
       >
-        {showForm ? '取消' : '+ 添加成员'}
+        {showForm ? '取消' : '+ 新增成員'}
       </button>
 
       {showForm && (
@@ -202,7 +202,7 @@ export default function PeoplePage() {
                     : 'bg-gray-100 text-gray-600'
                 }`}
               >
-                {person.is_confirmed ? '✓ 已确认' : '未确认'}
+                {person.is_confirmed ? '✓ 已確認' : '未確認'}
               </button>
             </div>
           </div>
