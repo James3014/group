@@ -9,7 +9,12 @@ export async function GET() {
     .order('departure_time', { ascending: true })
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error('Transport API 錯誤:', error.message)
+    return NextResponse.json([])
+  }
+
+  if (!transports || transports.length === 0) {
+    return NextResponse.json([])
   }
 
   // 獲取每個交通工具的乘客
@@ -42,6 +47,7 @@ export async function POST(request: Request) {
     .single()
 
   if (error) {
+    console.error('新增交通錯誤:', error.message)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 

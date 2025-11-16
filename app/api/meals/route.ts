@@ -9,7 +9,12 @@ export async function GET() {
     .order('meal_time', { ascending: true })
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error('Meals API 錯誤:', error.message)
+    return NextResponse.json([])
+  }
+
+  if (!meals || meals.length === 0) {
+    return NextResponse.json([])
   }
 
   // 獲取每個餐飲的參與者
@@ -42,6 +47,7 @@ export async function POST(request: Request) {
     .single()
 
   if (error) {
+    console.error('新增餐飲錯誤:', error.message)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 

@@ -9,10 +9,11 @@ export async function GET() {
     .order('created_at', { ascending: false })
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error('Tasks API 錯誤:', error.message)
+    return NextResponse.json([])
   }
 
-  return NextResponse.json(data)
+  return NextResponse.json(data || [])
 }
 
 // 新增任務
@@ -26,6 +27,7 @@ export async function POST(request: Request) {
     .single()
 
   if (error) {
+    console.error('新增任務錯誤:', error.message)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
