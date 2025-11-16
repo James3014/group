@@ -19,15 +19,71 @@ export default function ViewPeoplePage() {
     setLoading(false)
   }
 
+  // 將有親子關係的人排在一起
+  function sortByFamily(peopleList: Person[]): Person[] {
+    const sorted: Person[] = []
+    const processed = new Set<number>()
+
+    // 先處理有子女的父母（一家人一起）
+    peopleList.forEach(person => {
+      if (person.age_group === 'adult' && !processed.has(person.id)) {
+        const children = peopleList.filter(p =>
+          p.father_id === person.id || p.mother_id === person.id
+        )
+
+        if (children.length > 0) {
+          // 找配偶（如果子女有另一個父母）
+          const spouse = children[0].father_id === person.id
+            ? peopleList.find(p => p.id === children[0].mother_id)
+            : peopleList.find(p => p.id === children[0].father_id)
+
+          // 父母先
+          sorted.push(person)
+          processed.add(person.id)
+          if (spouse && !processed.has(spouse.id)) {
+            sorted.push(spouse)
+            processed.add(spouse.id)
+          }
+
+          // 子女緊接著
+          children.forEach(child => {
+            if (!processed.has(child.id)) {
+              sorted.push(child)
+              processed.add(child.id)
+            }
+          })
+        }
+      }
+    })
+
+    // 再處理沒有子女的成人
+    peopleList.forEach(person => {
+      if (person.age_group === 'adult' && !processed.has(person.id)) {
+        sorted.push(person)
+        processed.add(person.id)
+      }
+    })
+
+    // 最後處理沒有父母資訊的小孩
+    peopleList.forEach(person => {
+      if (!processed.has(person.id)) {
+        sorted.push(person)
+        processed.add(person.id)
+      }
+    })
+
+    return sorted
+  }
+
   const confirmed = people.filter(p => p.is_confirmed)
   const pending = people.filter(p => !p.is_confirmed)
 
-  // 搜尋過濾
-  const filteredConfirmed = confirmed.filter(p =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // 搜尋過濾並按家庭排序
+  const filteredConfirmed = sortByFamily(
+    confirmed.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
   )
-  const filteredPending = pending.filter(p =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPending = sortByFamily(
+    pending.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
   )
 
   if (loading) return (
