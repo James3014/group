@@ -1,12 +1,18 @@
 // 核心数据类型 - 简单、直接、无废话
 
 export type SkiLevel = 'beginner' | 'intermediate' | 'advanced'
+export type BoardType = 'ski' | 'snowboard'
+export type AgeGroup = 'adult' | 'child'
+export type Equipment = 'own' | 'rental'
 
 export interface Person {
   id: number
   name: string
   phone?: string
   ski_level: SkiLevel
+  board_type: BoardType
+  age_group: AgeGroup
+  equipment: Equipment
   is_admin: boolean
   is_confirmed: boolean
   created_at?: string
