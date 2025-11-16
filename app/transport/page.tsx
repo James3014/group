@@ -10,6 +10,7 @@ export default function TransportPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [error, setError] = useState<string>('')
+  const [editingId, setEditingId] = useState<number | null>(null)
   const [formData, setFormData] = useState({
     driver_id: undefined as number | undefined,
     seats: 4,
@@ -59,6 +60,41 @@ export default function TransportPage() {
       departure_time: defaultTime,
       passenger_ids: []
     })
+    setEditingId(null)
+    setError('')
+  }
+
+  function startEdit(transport: Transport) {
+    setFormData({
+      driver_id: transport.driver_id,
+      seats: transport.seats,
+      departure_time: transport.departure_time.substring(0, 16), // 轉換為 datetime-local 格式
+      passenger_ids: transport.passenger_ids || []
+    })
+    setEditingId(transport.id)
+    setShowForm(true)
+    setError('')
+  }
+
+  async function deleteTransport(id: number, name: string) {
+    if (!confirm(`確定要刪除「${name}」嗎？`)) return
+
+    try {
+      const response = await fetch(`/api/transport/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        alert(`刪除失敗：${data.error}`)
+        return
+      }
+
+      await fetchData()
+    } catch (err) {
+      console.error('刪除交通工具錯誤:', err)
+      alert('刪除失敗，請稍後再試')
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -93,11 +129,15 @@ export default function TransportPage() {
       passenger_ids: formData.passenger_ids,
     }
 
-    console.log('準備新增交通工具:', payload)
+    const isEditing = editingId !== null
+    console.log(isEditing ? '準備更新交通工具:' : '準備新增交通工具:', payload)
 
     try {
-      const response = await fetch('/api/transport', {
-        method: 'POST',
+      const url = isEditing ? `/api/transport/${editingId}` : '/api/transport'
+      const method = isEditing ? 'PATCH' : 'POST'
+
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
@@ -108,18 +148,18 @@ export default function TransportPage() {
       console.log('API 回應資料:', data)
 
       if (!response.ok) {
-        const errorMsg = data.error || `新增失敗 (${response.status})`
-        console.error('新增失敗:', errorMsg)
+        const errorMsg = data.error || `${isEditing ? '更新' : '新增'}失敗 (${response.status})`
+        console.error(`${isEditing ? '更新' : '新增'}失敗:`, errorMsg)
         setError(errorMsg)
         return
       }
 
       // 檢查是否有警告訊息
       if (data.warning) {
-        console.warn('建立成功但有警告:', data.warning)
+        console.warn('操作成功但有警告:', data.warning)
       }
 
-      console.log('✅ 交通工具新增成功')
+      console.log(`✅ 交通工具${isEditing ? '更新' : '新增'}成功`)
 
       // 成功後才關閉表單
       initializeForm()
@@ -127,7 +167,7 @@ export default function TransportPage() {
       await fetchData()
     } catch (err: any) {
       const errorMsg = err.message || '網路錯誤，請稍後再試'
-      console.error('新增車輛錯誤:', err)
+      console.error(`${isEditing ? '更新' : '新增'}車輛錯誤:`, err)
       setError(errorMsg)
     }
   }
@@ -203,6 +243,9 @@ export default function TransportPage() {
         onClick={() => {
           if (!showForm) {
             initializeForm()
+          } else {
+            initializeForm()
+            setShowForm(false)
           }
           setShowForm(!showForm)
         }}
@@ -282,7 +325,7 @@ export default function TransportPage() {
             <p className="text-sm text-gray-600 mt-1">已選擇 {formData.passenger_ids.length} 人</p>
           </div>
           <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-            新增
+            {editingId ? '更新' : '新增'}
           </button>
         </form>
       )}
@@ -297,9 +340,23 @@ export default function TransportPage() {
             <div key={transport.id} className="p-4 bg-white rounded-lg shadow">
               <div className="flex justify-between items-start mb-2">
                 <h3 className="font-bold text-lg">{transport.vehicle_name}</h3>
-                <span className="text-sm text-gray-500">
-                  {formatDateTime(transport.departure_time)}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500">
+                    {formatDateTime(transport.departure_time)}
+                  </span>
+                  <button
+                    onClick={() => startEdit(transport)}
+                    className="px-2 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                  >
+                    編輯
+                  </button>
+                  <button
+                    onClick={() => deleteTransport(transport.id, transport.vehicle_name)}
+                    className="px-2 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
+                  >
+                    刪除
+                  </button>
+                </div>
               </div>
               <div className="flex items-center gap-4 text-sm mb-2">
                 <span className={available > 0 ? 'text-green-600' : 'text-red-600'}>

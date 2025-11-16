@@ -9,6 +9,7 @@ export default function MealsPage() {
   const [tripSettings, setTripSettings] = useState<TripSettings | null>(null)
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState<number | null>(null)
   const [formData, setFormData] = useState({
     restaurant: '',
     meal_time: '',
@@ -36,14 +37,55 @@ export default function MealsPage() {
     setLoading(false)
   }
 
+  function resetForm() {
+    setFormData({ restaurant: '', meal_time: '', notes: '' })
+    setEditingId(null)
+  }
+
+  function startEdit(meal: Meal) {
+    setFormData({
+      restaurant: meal.restaurant,
+      meal_time: meal.meal_time.substring(0, 16),
+      notes: meal.notes || '',
+    })
+    setEditingId(meal.id)
+    setShowForm(true)
+  }
+
+  async function deleteMeal(id: number, name: string) {
+    if (!confirm(`確定要刪除「${name}」嗎？`)) return
+
+    try {
+      const response = await fetch(`/api/meals/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        alert('刪除失敗')
+        return
+      }
+
+      await fetchData()
+    } catch (err) {
+      console.error('刪除餐飲錯誤:', err)
+      alert('刪除失敗，請稍後再試')
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    await fetch('/api/meals', {
-      method: 'POST',
+
+    const isEditing = editingId !== null
+    const url = isEditing ? `/api/meals/${editingId}` : '/api/meals'
+    const method = isEditing ? 'PATCH' : 'POST'
+
+    await fetch(url, {
+      method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData),
     })
-    setFormData({ restaurant: '', meal_time: '', notes: '' })
+
+    resetForm()
     setShowForm(false)
     fetchData()
   }
@@ -88,7 +130,12 @@ export default function MealsPage() {
       )}
 
       <button
-        onClick={() => setShowForm(!showForm)}
+        onClick={() => {
+          if (showForm) {
+            resetForm()
+          }
+          setShowForm(!showForm)
+        }}
         className="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         disabled={!tripSettings}
       >
@@ -135,7 +182,7 @@ export default function MealsPage() {
             />
           </div>
           <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-            新增
+            {editingId ? '更新' : '新增'}
           </button>
         </form>
       )}
@@ -145,9 +192,23 @@ export default function MealsPage() {
           <div key={meal.id} className="p-4 bg-white rounded-lg shadow">
             <div className="flex justify-between items-start mb-2">
               <h3 className="font-bold text-lg">{meal.restaurant}</h3>
-              <span className="text-sm text-gray-500">
-                {formatDateTime(meal.meal_time)}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">
+                  {formatDateTime(meal.meal_time)}
+                </span>
+                <button
+                  onClick={() => startEdit(meal)}
+                  className="px-2 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                >
+                  編輯
+                </button>
+                <button
+                  onClick={() => deleteMeal(meal.id, meal.restaurant)}
+                  className="px-2 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
+                >
+                  刪除
+                </button>
+              </div>
             </div>
             {meal.notes && (
               <p className="text-gray-600 text-sm mb-2">{meal.notes}</p>
