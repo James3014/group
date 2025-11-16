@@ -5,6 +5,7 @@ export type BoardType = 'ski' | 'snowboard'
 export type AgeGroup = 'adult' | 'child'
 export type Equipment = 'own' | 'rental'
 export type SkiSession = 'morning' | 'afternoon' | 'evening'  // 上午、下午、晚上
+export type ApplicationStatus = 'pending' | 'approved' | 'rejected'
 
 // Multi-Tenant: Trip（滑雪團）
 export interface Trip {
@@ -13,6 +14,21 @@ export interface Trip {
   trip_name: string         // 行程名稱
   owner_email: string       // 團主 email
   is_active: boolean        // 是否啟用
+  created_at: string
+}
+
+// Trip 申請
+export interface TripApplication {
+  id: number
+  applicant_email: string   // 申請人 email
+  trip_name: string         // 申請的行程名稱
+  proposed_slug?: string    // 建議的 slug
+  status: ApplicationStatus // 申請狀態
+  notes?: string            // 申請說明
+  admin_notes?: string      // 管理員備註
+  reviewed_at?: string      // 審核時間
+  reviewed_by?: string      // 審核者 email
+  trip_id?: number          // 核准後的 trip_id
   created_at: string
 }
 
