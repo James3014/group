@@ -36,11 +36,6 @@ export default function HomePage() {
           <h2 className="font-bold">任務清單</h2>
         </a>
       </nav>
-
-      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
-        <p className="font-bold mb-1">⏰ 倒數計時</p>
-        <p className="text-gray-700">距離聖誕節出發還有 XX 天</p>
-      </div>
     </div>
   )
 }

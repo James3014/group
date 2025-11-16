@@ -37,6 +37,22 @@ export default function TransportPage() {
     setLoading(false)
   }
 
+  // 初始化表單預設值
+  function initializeForm() {
+    let defaultTime = ''
+    if (tripSettings) {
+      // 設定為行程第一天早上 07:30
+      defaultTime = `${tripSettings.start_date}T07:30`
+    }
+
+    setFormData({
+      driver_id: undefined,
+      seats: 4,
+      departure_time: defaultTime,
+      passenger_ids: []
+    })
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
@@ -56,12 +72,7 @@ export default function TransportPage() {
       }),
     })
 
-    setFormData({
-      driver_id: undefined,
-      seats: 4,
-      departure_time: '',
-      passenger_ids: []
-    })
+    initializeForm()
     setShowForm(false)
     fetchData()
   }
@@ -134,7 +145,12 @@ export default function TransportPage() {
       )}
 
       <button
-        onClick={() => setShowForm(!showForm)}
+        onClick={() => {
+          if (!showForm) {
+            initializeForm()
+          }
+          setShowForm(!showForm)
+        }}
         className="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         disabled={!tripSettings}
       >
