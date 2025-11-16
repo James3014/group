@@ -22,20 +22,27 @@ export default function TransportPage() {
   }, [])
 
   async function fetchData() {
-    const [transportsRes, peopleRes, tripRes] = await Promise.all([
-      fetch('/api/transport'),
-      fetch('/api/people'),
-      fetch('/api/trip-settings')
-    ])
-    const [transportsData, peopleData, tripData] = await Promise.all([
-      transportsRes.json(),
-      peopleRes.json(),
-      tripRes.json()
-    ])
-    setTransports(transportsData)
-    setPeople(peopleData)
-    setTripSettings(tripData)
-    setLoading(false)
+    try {
+      console.log('開始載入資料...')
+      const [transportsRes, peopleRes, tripRes] = await Promise.all([
+        fetch('/api/transport'),
+        fetch('/api/people'),
+        fetch('/api/trip-settings')
+      ])
+      const [transportsData, peopleData, tripData] = await Promise.all([
+        transportsRes.json(),
+        peopleRes.json(),
+        tripRes.json()
+      ])
+      console.log('載入完成 - 交通工具:', transportsData.length, '人員:', peopleData.length, '行程設定:', tripData ? '有' : '無')
+      setTransports(transportsData)
+      setPeople(peopleData)
+      setTripSettings(tripData)
+      setLoading(false)
+    } catch (err) {
+      console.error('載入資料錯誤:', err)
+      setLoading(false)
+    }
   }
 
   // 初始化表單預設值
@@ -58,37 +65,70 @@ export default function TransportPage() {
     e.preventDefault()
     setError('')
 
+    // 驗證司機已選擇
+    if (!formData.driver_id) {
+      setError('請選擇司機')
+      return
+    }
+
+    // 驗證出發時間
+    if (!formData.departure_time) {
+      setError('請選擇出發時間')
+      return
+    }
+
     // 找出司機名稱
     const driver = people.find(p => p.id === formData.driver_id)
-    const vehicle_name = driver ? `${driver.name}的車` : '未命名車輛'
+    if (!driver) {
+      setError('找不到選擇的司機，請重新選擇')
+      return
+    }
+    const vehicle_name = `${driver.name}的車`
+
+    const payload = {
+      vehicle_name,
+      driver_id: formData.driver_id,
+      seats: formData.seats,
+      departure_time: formData.departure_time,
+      passenger_ids: formData.passenger_ids,
+    }
+
+    console.log('準備新增交通工具:', payload)
 
     try {
       const response = await fetch('/api/transport', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          vehicle_name,
-          driver_id: formData.driver_id,
-          seats: formData.seats,
-          departure_time: formData.departure_time,
-          passenger_ids: formData.passenger_ids,
-        }),
+        body: JSON.stringify(payload),
       })
 
+      console.log('API 回應狀態:', response.status)
+
       const data = await response.json()
+      console.log('API 回應資料:', data)
 
       if (!response.ok) {
-        setError(data.error || '新增失敗，請檢查資料庫是否已建立')
+        const errorMsg = data.error || `新增失敗 (${response.status})`
+        console.error('新增失敗:', errorMsg)
+        setError(errorMsg)
         return
       }
+
+      // 檢查是否有警告訊息
+      if (data.warning) {
+        console.warn('建立成功但有警告:', data.warning)
+      }
+
+      console.log('✅ 交通工具新增成功')
 
       // 成功後才關閉表單
       initializeForm()
       setShowForm(false)
-      fetchData()
-    } catch (err) {
-      setError('網路錯誤，請稍後再試')
+      await fetchData()
+    } catch (err: any) {
+      const errorMsg = err.message || '網路錯誤，請稍後再試'
       console.error('新增車輛錯誤:', err)
+      setError(errorMsg)
     }
   }
 
