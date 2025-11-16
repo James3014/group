@@ -9,6 +9,7 @@ export default function TransportPage() {
   const [tripSettings, setTripSettings] = useState<TripSettings | null>(null)
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [error, setError] = useState<string>('')
   const [formData, setFormData] = useState({
     driver_id: undefined as number | undefined,
     seats: 4,
@@ -55,26 +56,40 @@ export default function TransportPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    setError('')
 
     // 找出司機名稱
     const driver = people.find(p => p.id === formData.driver_id)
     const vehicle_name = driver ? `${driver.name}的車` : '未命名車輛'
 
-    await fetch('/api/transport', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        vehicle_name,
-        driver_id: formData.driver_id,
-        seats: formData.seats,
-        departure_time: formData.departure_time,
-        passenger_ids: formData.passenger_ids,
-      }),
-    })
+    try {
+      const response = await fetch('/api/transport', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          vehicle_name,
+          driver_id: formData.driver_id,
+          seats: formData.seats,
+          departure_time: formData.departure_time,
+          passenger_ids: formData.passenger_ids,
+        }),
+      })
 
-    initializeForm()
-    setShowForm(false)
-    fetchData()
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || '新增失敗，請檢查資料庫是否已建立')
+        return
+      }
+
+      // 成功後才關閉表單
+      initializeForm()
+      setShowForm(false)
+      fetchData()
+    } catch (err) {
+      setError('網路錯誤，請稍後再試')
+      console.error('新增車輛錯誤:', err)
+    }
   }
 
   function togglePassenger(personId: number) {
@@ -159,6 +174,11 @@ export default function TransportPage() {
 
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-6 p-4 bg-white rounded-lg shadow">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+              ❌ {error}
+            </div>
+          )}
           <div className="mb-3">
             <label className="block mb-1 font-bold">司機 *</label>
             <select
