@@ -96,13 +96,24 @@ export default function GroupsPage() {
 
     const newMemberIds = [...(group.member_ids || []), personId]
 
-    await fetch(`/api/ski-groups/${groupId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ member_ids: newMemberIds }),
-    })
+    try {
+      const response = await fetch(`/api/ski-groups/${groupId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ member_ids: newMemberIds }),
+      })
 
-    fetchData()
+      if (!response.ok) {
+        const errorData = await response.json()
+        alert(`添加成員失敗：${errorData.error || '未知錯誤'}\n\n請確認已在 Supabase 建立 ski_groups 和 ski_group_members 表格`)
+        return
+      }
+
+      fetchData()
+    } catch (error) {
+      console.error('添加成員錯誤:', error)
+      alert('添加成員失敗，請查看控制台錯誤訊息')
+    }
   }
 
   async function removeMemberFromGroup(groupId: number, personId: number) {
@@ -111,13 +122,24 @@ export default function GroupsPage() {
 
     const newMemberIds = (group.member_ids || []).filter(id => id !== personId)
 
-    await fetch(`/api/ski-groups/${groupId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ member_ids: newMemberIds }),
-    })
+    try {
+      const response = await fetch(`/api/ski-groups/${groupId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ member_ids: newMemberIds }),
+      })
 
-    fetchData()
+      if (!response.ok) {
+        const errorData = await response.json()
+        alert(`移除成員失敗：${errorData.error || '未知錯誤'}`)
+        return
+      }
+
+      fetchData()
+    } catch (error) {
+      console.error('移除成員錯誤:', error)
+      alert('移除成員失敗，請查看控制台錯誤訊息')
+    }
   }
 
   // 計算未分組的人員
