@@ -10,6 +10,7 @@ CREATE TABLE people (
   board_type VARCHAR(20) DEFAULT 'ski',        -- 'ski' (雙板) or 'snowboard' (單板)
   age_group VARCHAR(20) DEFAULT 'adult',       -- 'adult' (大人) or 'child' (小孩)
   equipment VARCHAR(20) DEFAULT 'rental',      -- 'own' (自備) or 'rental' (租借)
+  has_radio BOOLEAN DEFAULT false,             -- 是否有無線電
   is_admin BOOLEAN DEFAULT false,
   is_confirmed BOOLEAN DEFAULT false,
   created_at TIMESTAMP DEFAULT NOW()
