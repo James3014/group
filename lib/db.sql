@@ -46,8 +46,7 @@ CREATE TABLE transport (
   vehicle_name VARCHAR(100) NOT NULL,
   driver_id INT REFERENCES people(id) ON DELETE SET NULL,
   seats INT NOT NULL,
-  departure_time TIMESTAMP NOT NULL,
-  departure_location VARCHAR(200) NOT NULL
+  departure_time TIMESTAMP NOT NULL
 );
 
 -- 乘客表（多對多）

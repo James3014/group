@@ -9,10 +9,10 @@ export default function TransportPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState({
-    vehicle_name: '',
+    driver_id: undefined as number | undefined,
     seats: 4,
     departure_time: '',
-    departure_location: '',
+    passenger_ids: [] as number[],
   })
 
   useEffect(() => {
@@ -35,14 +35,45 @@ export default function TransportPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+
+    // 找出司機名稱
+    const driver = people.find(p => p.id === formData.driver_id)
+    const vehicle_name = driver ? `${driver.name}的車` : '未命名車輛'
+
     await fetch('/api/transport', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
+      body: JSON.stringify({
+        vehicle_name,
+        driver_id: formData.driver_id,
+        seats: formData.seats,
+        departure_time: formData.departure_time,
+        passenger_ids: formData.passenger_ids,
+      }),
     })
-    setFormData({ vehicle_name: '', seats: 4, departure_time: '', departure_location: '' })
+
+    setFormData({
+      driver_id: undefined,
+      seats: 4,
+      departure_time: '',
+      passenger_ids: []
+    })
     setShowForm(false)
     fetchData()
+  }
+
+  function togglePassenger(personId: number) {
+    if (formData.passenger_ids.includes(personId)) {
+      setFormData({
+        ...formData,
+        passenger_ids: formData.passenger_ids.filter(id => id !== personId)
+      })
+    } else {
+      setFormData({
+        ...formData,
+        passenger_ids: [...formData.passenger_ids, personId]
+      })
+    }
   }
 
   function formatDateTime(dateString: string) {
@@ -59,6 +90,9 @@ export default function TransportPage() {
 
   const totalSeats = transports.reduce((sum, t) => sum + t.seats, 0)
   const occupiedSeats = transports.reduce((sum, t) => sum + (t.passenger_ids?.length || 0), 0)
+
+  // 取得司機對象
+  const driver = formData.driver_id ? people.find(p => p.id === formData.driver_id) : null
 
   return (
     <div className="min-h-screen p-4 max-w-4xl mx-auto">
@@ -80,15 +114,21 @@ export default function TransportPage() {
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-6 p-4 bg-white rounded-lg shadow">
           <div className="mb-3">
-            <label className="block mb-1 font-bold">車輛名稱 *</label>
-            <input
-              type="text"
+            <label className="block mb-1 font-bold">司機 *</label>
+            <select
               required
-              value={formData.vehicle_name}
-              onChange={e => setFormData({ ...formData, vehicle_name: e.target.value })}
+              value={formData.driver_id || ''}
+              onChange={e => setFormData({ ...formData, driver_id: e.target.value ? parseInt(e.target.value) : undefined })}
               className="w-full p-2 border rounded"
-              placeholder="例如：小明的車"
-            />
+            >
+              <option value="">請選擇司機</option>
+              {people.map(person => (
+                <option key={person.id} value={person.id}>{person.name}</option>
+              ))}
+            </select>
+            {driver && (
+              <p className="text-sm text-gray-600 mt-1">車輛名稱：{driver.name}的車</p>
+            )}
           </div>
           <div className="mb-3">
             <label className="block mb-1 font-bold">座位數 *</label>
@@ -112,15 +152,21 @@ export default function TransportPage() {
             />
           </div>
           <div className="mb-3">
-            <label className="block mb-1 font-bold">出發地點 *</label>
-            <input
-              type="text"
-              required
-              value={formData.departure_location}
-              onChange={e => setFormData({ ...formData, departure_location: e.target.value })}
-              className="w-full p-2 border rounded"
-              placeholder="例如：台北車站東三門"
-            />
+            <label className="block mb-2 font-bold">乘客（可選）</label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-60 overflow-y-auto border rounded p-2">
+              {people.filter(p => p.id !== formData.driver_id).map(person => (
+                <label key={person.id} className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-50 rounded">
+                  <input
+                    type="checkbox"
+                    checked={formData.passenger_ids.includes(person.id)}
+                    onChange={() => togglePassenger(person.id)}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm">{person.name}</span>
+                </label>
+              ))}
+            </div>
+            <p className="text-sm text-gray-600 mt-1">已選擇 {formData.passenger_ids.length} 人</p>
           </div>
           <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
             新增
@@ -132,6 +178,7 @@ export default function TransportPage() {
         {transports.map(transport => {
           const occupied = transport.passenger_ids?.length || 0
           const available = transport.seats - occupied
+          const passengers = people.filter(p => transport.passenger_ids?.includes(p.id))
 
           return (
             <div key={transport.id} className="p-4 bg-white rounded-lg shadow">
@@ -141,10 +188,7 @@ export default function TransportPage() {
                   {formatDateTime(transport.departure_time)}
                 </span>
               </div>
-              <p className="text-gray-600 text-sm mb-2">
-                📍 {transport.departure_location}
-              </p>
-              <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-4 text-sm mb-2">
                 <span className={available > 0 ? 'text-green-600' : 'text-red-600'}>
                   座位：{occupied}/{transport.seats}
                 </span>
@@ -155,6 +199,12 @@ export default function TransportPage() {
                   <span className="text-red-600">已滿</span>
                 )}
               </div>
+              {passengers.length > 0 && (
+                <div className="mt-2 text-sm">
+                  <span className="text-gray-600">乘客：</span>
+                  <span className="text-gray-800">{passengers.map(p => p.name).join('、')}</span>
+                </div>
+              )}
             </div>
           )
         })}

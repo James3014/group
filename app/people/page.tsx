@@ -7,14 +7,15 @@ export default function PeoplePage() {
   const [people, setPeople] = useState<Person[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState<number | null>(null)
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    ski_level: 'beginner' as SkiLevel,
-    board_type: 'ski' as BoardType,
+    ski_level: 'intermediate' as SkiLevel,
+    board_type: 'snowboard' as BoardType,
     age_group: 'adult' as AgeGroup,
-    equipment: 'rental' as Equipment,
-    has_radio: false,
+    equipment: 'own' as Equipment,
+    has_radio: true,
   })
 
   useEffect(() => {
@@ -28,23 +29,63 @@ export default function PeoplePage() {
     setLoading(false)
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    await fetch('/api/people', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    })
+  function resetForm() {
     setFormData({
       name: '',
       phone: '',
-      ski_level: 'beginner',
-      board_type: 'ski',
+      ski_level: 'intermediate',
+      board_type: 'snowboard',
       age_group: 'adult',
-      equipment: 'rental',
-      has_radio: false
+      equipment: 'own',
+      has_radio: true
     })
+    setEditingId(null)
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+
+    if (editingId) {
+      // 編輯現有人員
+      await fetch(`/api/people/${editingId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+    } else {
+      // 新增人員
+      await fetch('/api/people', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+    }
+
+    resetForm()
     setShowForm(false)
+    fetchPeople()
+  }
+
+  function startEdit(person: Person) {
+    setFormData({
+      name: person.name,
+      phone: person.phone || '',
+      ski_level: person.ski_level,
+      board_type: person.board_type,
+      age_group: person.age_group,
+      equipment: person.equipment,
+      has_radio: person.has_radio,
+    })
+    setEditingId(person.id)
+    setShowForm(true)
+  }
+
+  async function deletePerson(id: number, name: string) {
+    if (!confirm(`確定要刪除 ${name} 嗎？`)) return
+
+    await fetch(`/api/people/${id}`, {
+      method: 'DELETE',
+    })
     fetchPeople()
   }
 
@@ -55,6 +96,11 @@ export default function PeoplePage() {
       body: JSON.stringify({ is_confirmed: !current }),
     })
     fetchPeople()
+  }
+
+  function handleCancel() {
+    resetForm()
+    setShowForm(false)
   }
 
   const confirmed = people.filter(p => p.is_confirmed).length
@@ -73,7 +119,10 @@ export default function PeoplePage() {
       </div>
 
       <button
-        onClick={() => setShowForm(!showForm)}
+        onClick={() => {
+          resetForm()
+          setShowForm(!showForm)
+        }}
         className="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
       >
         {showForm ? '取消' : '+ 新增成員'}
@@ -81,6 +130,7 @@ export default function PeoplePage() {
 
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-6 p-4 bg-white rounded-lg shadow">
+          <h3 className="font-bold mb-3">{editingId ? '編輯成員' : '新增成員'}</h3>
           <div className="mb-3">
             <label className="block mb-1 font-bold">姓名 *</label>
             <input
@@ -156,54 +206,73 @@ export default function PeoplePage() {
               <span className="font-bold">📻 有無線電</span>
             </label>
           </div>
-          <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-            確認新增
-          </button>
+          <div className="flex gap-2">
+            <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+              {editingId ? '儲存' : '確認新增'}
+            </button>
+            <button type="button" onClick={handleCancel} className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+              取消
+            </button>
+          </div>
         </form>
       )}
 
       <div className="grid gap-3">
         {people.map(person => (
-          <div key={person.id} className="p-4 bg-white rounded-lg shadow flex items-center justify-between">
-            <div>
-              <h3 className="font-bold text-lg">
-                {person.name}
-                {person.age_group === 'child' && ' 👶'}
-              </h3>
-              <p className="text-sm text-gray-600">{person.phone || '未填寫電話'}</p>
-              <div className="flex gap-3 text-sm mt-1 flex-wrap">
-                <span>
-                  {person.ski_level === 'beginner' && '初級'}
-                  {person.ski_level === 'intermediate' && '中級'}
-                  {person.ski_level === 'advanced' && '高級'}
-                </span>
-                <span>|</span>
-                <span>
-                  {person.board_type === 'ski' ? '🎿 雙板' : '🏂 單板'}
-                </span>
-                <span>|</span>
-                <span>
-                  {person.equipment === 'own' ? '✓ 自備裝備' : '📦 租借裝備'}
-                </span>
-                {person.has_radio && (
-                  <>
-                    <span>|</span>
-                    <span className="text-green-600">📻 有無線電</span>
-                  </>
-                )}
+          <div key={person.id} className="p-4 bg-white rounded-lg shadow">
+            <div className="flex items-start justify-between mb-2">
+              <div className="flex-1">
+                <h3 className="font-bold text-lg">
+                  {person.name}
+                  {person.age_group === 'child' && ' 👶'}
+                </h3>
+                <p className="text-sm text-gray-600">{person.phone || '未填寫電話'}</p>
+                <div className="flex gap-3 text-sm mt-1 flex-wrap">
+                  <span>
+                    {person.ski_level === 'beginner' && '初級'}
+                    {person.ski_level === 'intermediate' && '中級'}
+                    {person.ski_level === 'advanced' && '高級'}
+                  </span>
+                  <span>|</span>
+                  <span>
+                    {person.board_type === 'ski' ? '🎿 雙板' : '🏂 單板'}
+                  </span>
+                  <span>|</span>
+                  <span>
+                    {person.equipment === 'own' ? '✓ 自備裝備' : '📦 租借裝備'}
+                  </span>
+                  {person.has_radio && (
+                    <>
+                      <span>|</span>
+                      <span className="text-green-600">📻 有無線電</span>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
-            <div>
-              <button
-                onClick={() => toggleConfirm(person.id, person.is_confirmed)}
-                className={`px-4 py-2 rounded ${
-                  person.is_confirmed
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-gray-100 text-gray-600'
-                }`}
-              >
-                {person.is_confirmed ? '✓ 已確認' : '未確認'}
-              </button>
+              <div className="flex gap-2 flex-col ml-4">
+                <button
+                  onClick={() => toggleConfirm(person.id, person.is_confirmed)}
+                  className={`px-3 py-1 rounded text-sm ${
+                    person.is_confirmed
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-gray-100 text-gray-600'
+                  }`}
+                >
+                  {person.is_confirmed ? '✓ 已確認' : '未確認'}
+                </button>
+                <button
+                  onClick={() => startEdit(person)}
+                  className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200"
+                >
+                  編輯
+                </button>
+                <button
+                  onClick={() => deletePerson(person.id, person.name)}
+                  className="px-3 py-1 bg-red-100 text-red-700 rounded text-sm hover:bg-red-200"
+                >
+                  刪除
+                </button>
+              </div>
             </div>
           </div>
         ))}
