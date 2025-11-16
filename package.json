@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test:stage1": "node tests/stage1-multi-tenant.test.js",
+    "migrate:stage1": "node scripts/run-migration.js"
   },
   "dependencies": {
     "next": "^14.2.0",
