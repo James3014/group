@@ -177,7 +177,7 @@ export default function ViewGroupsPage() {
                           key={person.id}
                           person={person}
                           people={people}
-                          highlight={searchName && person.name.toLowerCase().includes(searchName.toLowerCase())}
+                          highlight={!!searchName && person.name.toLowerCase().includes(searchName.toLowerCase())}
                         />
                       ))}
                     </div>
