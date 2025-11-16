@@ -81,7 +81,7 @@ export default function ViewMealsPage() {
                 <div className="space-y-3">
                   {dateMeals.map(meal => {
                     const { time } = formatMealTime(meal.meal_time)
-                    const attendees = people.filter(p => meal.attendee_ids?.includes(p.id))
+                    const attendees = people.filter(p => meal.participant_ids?.includes(p.id))
 
                     return (
                       <div
