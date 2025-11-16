@@ -8,7 +8,7 @@ export async function GET() {
 
     const { data: transports, error } = await supabase
       .from('transport')
-      .select('*, driver:people(name)')
+      .select('*, driver:people!transport_driver_id_fkey(name)')
       .order('departure_time', { ascending: true })
 
     if (error) {
