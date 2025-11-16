@@ -92,7 +92,7 @@ export default function PeoplePage() {
             />
           </div>
           <div className="mb-3">
-            <label className="block mb-1 font-bold">电话</label>
+            <label className="block mb-1 font-bold">電話</label>
             <input
               type="tel"
               value={formData.phone}
