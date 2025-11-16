@@ -103,6 +103,7 @@ CREATE TABLE ski_groups (
   id SERIAL PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
   group_date DATE,
+  session VARCHAR(20),  -- 'morning' (上午), 'afternoon' (下午), 'evening' (晚上)
   notes TEXT,
   created_at TIMESTAMP DEFAULT NOW()
 );

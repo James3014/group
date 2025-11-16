@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Person, SkiGroup } from '@/lib/types'
+import { Person, SkiGroup, SkiSession } from '@/lib/types'
 
 export default function GroupsPage() {
   const [groups, setGroups] = useState<SkiGroup[]>([])
@@ -9,9 +9,12 @@ export default function GroupsPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
+  const [filterDate, setFilterDate] = useState<string>('')
+  const [filterSession, setFilterSession] = useState<string>('all')
   const [formData, setFormData] = useState({
     name: '',
     group_date: '',
+    session: '' as SkiSession | '',
     notes: '',
   })
 
@@ -39,7 +42,7 @@ export default function GroupsPage() {
   }
 
   function resetForm() {
-    setFormData({ name: '', group_date: '', notes: '' })
+    setFormData({ name: '', group_date: '', session: '', notes: '' })
     setEditingId(null)
   }
 
@@ -47,11 +50,52 @@ export default function GroupsPage() {
     setFormData({
       name: group.name,
       group_date: group.group_date || '',
+      session: group.session || '',
       notes: group.notes || '',
     })
     setEditingId(group.id)
     setShowForm(true)
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // 複製組別到其他日期/時段
+  async function copyGroup(group: SkiGroup) {
+    const targetDate = prompt('請輸入目標日期 (YYYY-MM-DD):', group.group_date || '')
+    if (!targetDate) return
+
+    const targetSession = prompt('請選擇時段\n輸入: morning (上午) / afternoon (下午) / evening (晚上):', group.session || '') as SkiSession
+    if (!targetSession || !['morning', 'afternoon', 'evening'].includes(targetSession)) {
+      alert('時段格式錯誤，請輸入 morning、afternoon 或 evening')
+      return
+    }
+
+    const newName = prompt('新組別名稱:', group.name) || group.name
+
+    try {
+      const response = await fetch('/api/ski-groups', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newName,
+          group_date: targetDate,
+          session: targetSession,
+          notes: group.notes || '',
+          member_ids: group.member_ids || []
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        alert(`複製失敗：${errorData.error || '未知錯誤'}`)
+        return
+      }
+
+      fetchData()
+      alert('複製成功！')
+    } catch (error) {
+      console.error('複製組別錯誤:', error)
+      alert('複製失敗，請查看控制台錯誤訊息')
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -180,6 +224,24 @@ export default function GroupsPage() {
     return relations.join(' | ')
   }
 
+  // 時段中文顯示
+  function getSessionText(session?: SkiSession): string {
+    if (!session) return ''
+    const sessionMap = {
+      morning: '上午',
+      afternoon: '下午',
+      evening: '晚上'
+    }
+    return sessionMap[session] || ''
+  }
+
+  // 篩選組別
+  const filteredGroups = groups.filter(group => {
+    if (filterDate && group.group_date !== filterDate) return false
+    if (filterSession !== 'all' && group.session !== filterSession) return false
+    return true
+  })
+
   if (loading) return <div className="p-4">載入中...</div>
 
   return (
@@ -221,14 +283,29 @@ export default function GroupsPage() {
               placeholder="例如：A組、B組、初學者組等"
             />
           </div>
-          <div className="mb-3">
-            <label className="block mb-1 font-bold">日期</label>
-            <input
-              type="date"
-              value={formData.group_date}
-              onChange={e => setFormData({ ...formData, group_date: e.target.value })}
-              className="w-full p-2 border rounded"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+            <div>
+              <label className="block mb-1 font-bold">日期</label>
+              <input
+                type="date"
+                value={formData.group_date}
+                onChange={e => setFormData({ ...formData, group_date: e.target.value })}
+                className="w-full p-2 border rounded"
+              />
+            </div>
+            <div>
+              <label className="block mb-1 font-bold">時段</label>
+              <select
+                value={formData.session}
+                onChange={e => setFormData({ ...formData, session: e.target.value as SkiSession | '' })}
+                className="w-full p-2 border rounded"
+              >
+                <option value="">未指定</option>
+                <option value="morning">上午</option>
+                <option value="afternoon">下午</option>
+                <option value="evening">晚上</option>
+              </select>
+            </div>
           </div>
           <div className="mb-3">
             <label className="block mb-1 font-bold">備註</label>
@@ -245,12 +322,48 @@ export default function GroupsPage() {
         </form>
       )}
 
+      {/* 篩選器 */}
+      <div className="mb-4 p-4 bg-white rounded-lg shadow">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label className="block mb-1 text-sm font-bold">篩選日期</label>
+            <input
+              type="date"
+              value={filterDate}
+              onChange={e => setFilterDate(e.target.value)}
+              className="w-full p-2 border rounded text-sm"
+            />
+          </div>
+          <div>
+            <label className="block mb-1 text-sm font-bold">篩選時段</label>
+            <select
+              value={filterSession}
+              onChange={e => setFilterSession(e.target.value)}
+              className="w-full p-2 border rounded text-sm"
+            >
+              <option value="all">全部時段</option>
+              <option value="morning">上午</option>
+              <option value="afternoon">下午</option>
+              <option value="evening">晚上</option>
+            </select>
+          </div>
+          <div className="flex items-end">
+            <button
+              onClick={() => { setFilterDate(''); setFilterSession('all'); }}
+              className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+            >
+              清除篩選
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* 左側：分組列表 */}
         <div className="lg:col-span-2 space-y-4">
-          <h2 className="text-xl font-bold">分組列表 ({groups.length} 組)</h2>
+          <h2 className="text-xl font-bold">分組列表 ({filteredGroups.length} / {groups.length} 組)</h2>
 
-          {groups.map(group => {
+          {filteredGroups.map(group => {
             const members = people.filter(p => group.member_ids?.includes(p.id))
 
             return (
@@ -258,14 +371,22 @@ export default function GroupsPage() {
                 <div className="flex justify-between items-start mb-3">
                   <div>
                     <h3 className="text-lg font-bold">{group.name}</h3>
-                    {group.group_date && (
-                      <p className="text-sm text-gray-500">📅 {group.group_date}</p>
-                    )}
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      {group.group_date && <span>📅 {group.group_date}</span>}
+                      {group.session && <span>⏰ {getSessionText(group.session)}</span>}
+                    </div>
                     {group.notes && (
                       <p className="text-sm text-gray-600 mt-1">{group.notes}</p>
                     )}
                   </div>
                   <div className="flex gap-2">
+                    <button
+                      onClick={() => copyGroup(group)}
+                      className="px-2 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200"
+                      title="複製到其他日期/時段"
+                    >
+                      複製
+                    </button>
                     <button
                       onClick={() => startEdit(group)}
                       className="px-2 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
@@ -344,6 +465,12 @@ export default function GroupsPage() {
               </div>
             )
           })}
+
+          {filteredGroups.length === 0 && groups.length > 0 && (
+            <div className="p-8 text-center text-gray-500 bg-white rounded-lg shadow">
+              沒有符合篩選條件的分組
+            </div>
+          )}
 
           {groups.length === 0 && (
             <div className="p-8 text-center text-gray-500 bg-white rounded-lg shadow">

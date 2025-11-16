@@ -4,6 +4,7 @@ export type SkiLevel = 'beginner' | 'intermediate' | 'advanced'
 export type BoardType = 'ski' | 'snowboard'
 export type AgeGroup = 'adult' | 'child'
 export type Equipment = 'own' | 'rental'
+export type SkiSession = 'morning' | 'afternoon' | 'evening'  // 上午、下午、晚上
 
 export interface Person {
   id: number
@@ -80,7 +81,8 @@ export interface TripSettings {
 export interface SkiGroup {
   id: number
   name: string
-  group_date?: string
+  group_date?: string      // 日期
+  session?: SkiSession     // 時段：上午/下午/晚上
   notes?: string
   created_at?: string
   member_ids?: number[]
