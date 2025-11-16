@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { getTripIdFromRequest } from '@/lib/trip-context'
 
 // 獲取行程設定
-export async function GET() {
+export async function GET(request: Request) {
+  const tripId = getTripIdFromRequest(request)
+
   const { data, error } = await supabase
     .from('trip_settings')
     .select('*')
+    .eq('trip_id', tripId)
     .order('created_at', { ascending: false })
     .limit(1)
     .single()
@@ -20,14 +24,21 @@ export async function GET() {
 
 // 新增或更新行程設定
 export async function POST(request: Request) {
+  const tripId = getTripIdFromRequest(request)
   const body = await request.json()
 
-  // 先刪除所有舊設定（簡單做法：只保留最新一筆）
-  await supabase.from('trip_settings').delete().neq('id', 0)
+  // 先刪除當前 trip 的舊設定（只保留最新一筆）
+  await supabase.from('trip_settings').delete().eq('trip_id', tripId)
+
+  // 自動加上 trip_id
+  const dataWithTripId = {
+    ...body,
+    trip_id: tripId
+  }
 
   const { data, error } = await supabase
     .from('trip_settings')
-    .insert([body])
+    .insert([dataWithTripId])
     .select()
     .single()
 

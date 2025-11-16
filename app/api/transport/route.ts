@@ -1,14 +1,17 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { getTripIdFromRequest } from '@/lib/trip-context'
 
 // 獲取所有交通安排
-export async function GET() {
+export async function GET(request: Request) {
+  const tripId = getTripIdFromRequest(request)
   try {
     console.log('開始查詢交通工具...')
 
     const { data: transports, error } = await supabase
       .from('transport')
       .select('*, driver:people!transport_driver_id_fkey(name)')
+      .eq('trip_id', tripId)
       .order('departure_time', { ascending: true })
 
     if (error) {
@@ -56,6 +59,7 @@ export async function GET() {
 
 // 新增交通安排
 export async function POST(request: Request) {
+  const tripId = getTripIdFromRequest(request)
   try {
     const body = await request.json()
     const { passenger_ids, ...transportData } = body
@@ -69,9 +73,15 @@ export async function POST(request: Request) {
       }, { status: 400 })
     }
 
+    // 自動加上 trip_id
+    const dataWithTripId = {
+      ...transportData,
+      trip_id: tripId
+    }
+
     const { data: transport, error } = await supabase
       .from('transport')
-      .insert([transportData])
+      .insert([dataWithTripId])
       .select()
       .single()
 

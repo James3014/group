@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { getTripIdFromRequest } from '@/lib/trip-context'
 
 // 獲取所有滑雪組
-export async function GET() {
+export async function GET(request: Request) {
+  const tripId = getTripIdFromRequest(request)
   try {
     const { data: groups, error } = await supabase
       .from('ski_groups')
       .select('*')
+      .eq('trip_id', tripId)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -42,13 +45,20 @@ export async function GET() {
 
 // 新增滑雪組
 export async function POST(request: Request) {
+  const tripId = getTripIdFromRequest(request)
   try {
     const body = await request.json()
     const { member_ids, ...groupData } = body
 
+    // 自動加上 trip_id
+    const dataWithTripId = {
+      ...groupData,
+      trip_id: tripId
+    }
+
     const { data: group, error } = await supabase
       .from('ski_groups')
-      .insert([groupData])
+      .insert([dataWithTripId])
       .select()
       .single()
 

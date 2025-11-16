@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { getTripIdFromRequest } from '@/lib/trip-context'
 
 // 獲取所有餐飲安排
-export async function GET() {
+export async function GET(request: Request) {
+  const tripId = getTripIdFromRequest(request)
+
   const { data: meals, error } = await supabase
     .from('meals')
     .select('*')
+    .eq('trip_id', tripId)
     .order('meal_time', { ascending: true })
 
   if (error) {
@@ -37,12 +41,19 @@ export async function GET() {
 
 // 新增餐飲安排
 export async function POST(request: Request) {
+  const tripId = getTripIdFromRequest(request)
   const body = await request.json()
   const { participant_ids, ...mealData } = body
 
+  // 自動加上 trip_id
+  const dataWithTripId = {
+    ...mealData,
+    trip_id: tripId
+  }
+
   const { data: meal, error } = await supabase
     .from('meals')
-    .insert([mealData])
+    .insert([dataWithTripId])
     .select()
     .single()
 

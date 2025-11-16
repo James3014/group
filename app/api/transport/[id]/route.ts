@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { getTripIdFromRequest } from '@/lib/trip-context'
 
 // 刪除交通工具
 export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
+  const tripId = getTripIdFromRequest(request)
   try {
     const id = parseInt(params.id)
 
@@ -20,6 +22,7 @@ export async function DELETE(
       .from('transport')
       .delete()
       .eq('id', id)
+      .eq('trip_id', tripId)  // 只能刪除自己 trip 的資料
 
     if (error) {
       console.error('刪除交通工具錯誤:', error)
@@ -38,6 +41,7 @@ export async function PATCH(
   request: Request,
   { params }: { params: { id: string } }
 ) {
+  const tripId = getTripIdFromRequest(request)
   try {
     const id = parseInt(params.id)
     const body = await request.json()
@@ -48,6 +52,7 @@ export async function PATCH(
       .from('transport')
       .update(transportData)
       .eq('id', id)
+      .eq('trip_id', tripId)  // 只能更新自己 trip 的資料
       .select()
       .single()
 
