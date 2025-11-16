@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Transport, Person } from '@/lib/types'
+import { Transport, Person, TripSettings } from '@/lib/types'
 
 export default function TransportPage() {
   const [transports, setTransports] = useState<Transport[]>([])
   const [people, setPeople] = useState<Person[]>([])
+  const [tripSettings, setTripSettings] = useState<TripSettings | null>(null)
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState({
@@ -20,16 +21,19 @@ export default function TransportPage() {
   }, [])
 
   async function fetchData() {
-    const [transportsRes, peopleRes] = await Promise.all([
+    const [transportsRes, peopleRes, tripRes] = await Promise.all([
       fetch('/api/transport'),
-      fetch('/api/people')
+      fetch('/api/people'),
+      fetch('/api/trip-settings')
     ])
-    const [transportsData, peopleData] = await Promise.all([
+    const [transportsData, peopleData, tripData] = await Promise.all([
       transportsRes.json(),
-      peopleRes.json()
+      peopleRes.json(),
+      tripRes.json()
     ])
     setTransports(transportsData)
     setPeople(peopleData)
+    setTripSettings(tripData)
     setLoading(false)
   }
 
@@ -86,6 +90,23 @@ export default function TransportPage() {
     })
   }
 
+  // 取得日期時間選擇器的 min 和 max 值
+  function getDateTimeLimits() {
+    if (!tripSettings) return { min: '', max: '' }
+
+    // 將日期轉換為 datetime-local 格式 (YYYY-MM-DDTHH:MM)
+    const startDate = new Date(tripSettings.start_date)
+    const endDate = new Date(tripSettings.end_date)
+
+    // 設定開始時間為當天 00:00
+    const min = `${tripSettings.start_date}T00:00`
+
+    // 設定結束時間為當天 23:59
+    const max = `${tripSettings.end_date}T23:59`
+
+    return { min, max }
+  }
+
   if (loading) return <div className="p-4">載入中...</div>
 
   const totalSeats = transports.reduce((sum, t) => sum + t.seats, 0)
@@ -93,6 +114,7 @@ export default function TransportPage() {
 
   // 取得司機對象
   const driver = formData.driver_id ? people.find(p => p.id === formData.driver_id) : null
+  const { min, max } = getDateTimeLimits()
 
   return (
     <div className="min-h-screen p-4 max-w-4xl mx-auto">
@@ -104,9 +126,17 @@ export default function TransportPage() {
         </p>
       </div>
 
+      {!tripSettings && (
+        <div className="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded">
+          <p className="font-bold">⚠️ 提示</p>
+          <p className="text-sm">請先到<a href="/trip-settings" className="text-blue-600 underline">行程設定</a>頁面設定行程日期</p>
+        </div>
+      )}
+
       <button
         onClick={() => setShowForm(!showForm)}
         className="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        disabled={!tripSettings}
       >
         {showForm ? '取消' : '+ 新增車輛'}
       </button>
@@ -149,7 +179,14 @@ export default function TransportPage() {
               value={formData.departure_time}
               onChange={e => setFormData({ ...formData, departure_time: e.target.value })}
               className="w-full p-2 border rounded"
+              min={min}
+              max={max}
             />
+            {tripSettings && (
+              <p className="text-xs text-gray-500 mt-1">
+                限制在行程期間：{tripSettings.start_date} ~ {tripSettings.end_date}
+              </p>
+            )}
           </div>
           <div className="mb-3">
             <label className="block mb-2 font-bold">乘客（可選）</label>
@@ -210,7 +247,7 @@ export default function TransportPage() {
         })}
 
         {transports.length === 0 && (
-          <div className="p-8 text-center text-gray-500">
+          <div className="p-8 text-center text-gray-500 bg-white rounded-lg shadow">
             還沒有安排交通工具
           </div>
         )}

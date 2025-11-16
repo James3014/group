@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Meal, Person } from '@/lib/types'
+import { Meal, Person, TripSettings } from '@/lib/types'
 
 export default function MealsPage() {
   const [meals, setMeals] = useState<Meal[]>([])
   const [people, setPeople] = useState<Person[]>([])
+  const [tripSettings, setTripSettings] = useState<TripSettings | null>(null)
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState({
@@ -19,16 +20,19 @@ export default function MealsPage() {
   }, [])
 
   async function fetchData() {
-    const [mealsRes, peopleRes] = await Promise.all([
+    const [mealsRes, peopleRes, tripRes] = await Promise.all([
       fetch('/api/meals'),
-      fetch('/api/people')
+      fetch('/api/people'),
+      fetch('/api/trip-settings')
     ])
-    const [mealsData, peopleData] = await Promise.all([
+    const [mealsData, peopleData, tripData] = await Promise.all([
       mealsRes.json(),
-      peopleRes.json()
+      peopleRes.json(),
+      tripRes.json()
     ])
     setMeals(mealsData)
     setPeople(peopleData)
+    setTripSettings(tripData)
     setLoading(false)
   }
 
@@ -54,7 +58,19 @@ export default function MealsPage() {
     })
   }
 
+  // 取得日期時間選擇器的 min 和 max 值
+  function getDateTimeLimits() {
+    if (!tripSettings) return { min: '', max: '' }
+
+    const min = `${tripSettings.start_date}T00:00`
+    const max = `${tripSettings.end_date}T23:59`
+
+    return { min, max }
+  }
+
   if (loading) return <div className="p-4">載入中...</div>
+
+  const { min, max } = getDateTimeLimits()
 
   return (
     <div className="min-h-screen p-4 max-w-4xl mx-auto">
@@ -64,9 +80,17 @@ export default function MealsPage() {
         <p className="text-gray-600">共 {meals.length} 個用餐安排</p>
       </div>
 
+      {!tripSettings && (
+        <div className="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded">
+          <p className="font-bold">⚠️ 提示</p>
+          <p className="text-sm">請先到<a href="/trip-settings" className="text-blue-600 underline">行程設定</a>頁面設定行程日期</p>
+        </div>
+      )}
+
       <button
         onClick={() => setShowForm(!showForm)}
         className="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        disabled={!tripSettings}
       >
         {showForm ? '取消' : '+ 新增用餐'}
       </button>
@@ -92,7 +116,14 @@ export default function MealsPage() {
               value={formData.meal_time}
               onChange={e => setFormData({ ...formData, meal_time: e.target.value })}
               className="w-full p-2 border rounded"
+              min={min}
+              max={max}
             />
+            {tripSettings && (
+              <p className="text-xs text-gray-500 mt-1">
+                限制在行程期間：{tripSettings.start_date} ~ {tripSettings.end_date}
+              </p>
+            )}
           </div>
           <div className="mb-3">
             <label className="block mb-1 font-bold">備註</label>
@@ -128,7 +159,7 @@ export default function MealsPage() {
         ))}
 
         {meals.length === 0 && (
-          <div className="p-8 text-center text-gray-500">
+          <div className="p-8 text-center text-gray-500 bg-white rounded-lg shadow">
             還沒有安排用餐
           </div>
         )}
