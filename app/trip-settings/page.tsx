@@ -8,6 +8,7 @@ export default function TripSettingsPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState({
+    trip_name: '',
     start_date: '',
     end_date: '',
     location: '神居滑雪場',
@@ -27,6 +28,7 @@ export default function TripSettingsPage() {
     // 如果有現有設定，填入表單
     if (data) {
       setFormData({
+        trip_name: data.trip_name || '',
         start_date: data.start_date,
         end_date: data.end_date,
         location: data.location || '神居滑雪場',
@@ -87,6 +89,17 @@ export default function TripSettingsPage() {
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-6 p-4 bg-white rounded-lg shadow">
           <div className="mb-3">
+            <label className="block mb-1 font-bold">行程名稱 *</label>
+            <input
+              type="text"
+              required
+              value={formData.trip_name}
+              onChange={e => setFormData({ ...formData, trip_name: e.target.value })}
+              className="w-full p-2 border rounded"
+              placeholder="例如：聖誕節 30人團隊行程管理"
+            />
+          </div>
+          <div className="mb-3">
             <label className="block mb-1 font-bold">開始日期 *</label>
             <input
               type="date"
@@ -133,8 +146,15 @@ export default function TripSettingsPage() {
 
       {settings ? (
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-2xl font-bold mb-4">{settings.location}</h2>
+          <h2 className="text-2xl font-bold mb-4">{settings.trip_name || settings.location}</h2>
           <div className="grid gap-4 mb-4">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">📍</span>
+              <div>
+                <p className="text-sm text-gray-600">地點</p>
+                <p className="text-lg font-bold">{settings.location}</p>
+              </div>
+            </div>
             <div className="flex items-center gap-3">
               <span className="text-3xl">📅</span>
               <div>

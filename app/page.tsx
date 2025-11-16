@@ -1,9 +1,30 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { TripSettings } from '@/lib/types'
+
 export default function HomePage() {
+  const [tripSettings, setTripSettings] = useState<TripSettings | null>(null)
+
+  useEffect(() => {
+    fetchTripSettings()
+  }, [])
+
+  async function fetchTripSettings() {
+    try {
+      const res = await fetch('/api/trip-settings')
+      const data = await res.json()
+      setTripSettings(data)
+    } catch (err) {
+      console.error('載入行程設定錯誤:', err)
+    }
+  }
+
   return (
     <div className="min-h-screen p-4 max-w-4xl mx-auto">
       <header className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">🏂 神居雪場滑雪團</h1>
-        <p className="text-gray-600">聖誕節 30人團隊行程管理</p>
+        <h1 className="text-3xl font-bold mb-2">🏂 {tripSettings?.location || '神居雪場滑雪團'}</h1>
+        <p className="text-gray-600">{tripSettings?.trip_name || '滑雪團行程管理'}</p>
       </header>
 
       <nav className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">

@@ -86,6 +86,7 @@ CREATE TABLE tasks (
 -- 行程設定表
 CREATE TABLE trip_settings (
   id SERIAL PRIMARY KEY,
+  trip_name VARCHAR(200) DEFAULT '滑雪團行程管理',
   start_date DATE NOT NULL,
   end_date DATE NOT NULL,
   location VARCHAR(100) DEFAULT '神居滑雪場',
@@ -96,3 +97,21 @@ CREATE TABLE trip_settings (
 -- 創建索引（只在必要的地方）
 CREATE INDEX idx_announcements_created_at ON announcements(created_at DESC);
 CREATE INDEX idx_tasks_completed ON tasks(is_completed);
+
+-- 滑雪組表（可以創建多個組，例如 A組、B組等）
+CREATE TABLE ski_groups (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  group_date DATE,
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- 滑雪組成員表（分配成員到各組）
+CREATE TABLE ski_group_members (
+  id SERIAL PRIMARY KEY,
+  group_id INT REFERENCES ski_groups(id) ON DELETE CASCADE,
+  person_id INT REFERENCES people(id) ON DELETE CASCADE,
+  created_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(group_id, person_id)  -- 同一個人不能在同一組中重複
+);
