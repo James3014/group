@@ -173,10 +173,7 @@ export default function ParticipantHomePage() {
               <h3 className="font-bold text-blue-900 mb-2">參加者模式</h3>
               <p className="text-sm text-blue-800">
                 這是唯讀瀏覽模式，您可以查看所有行程資訊但無法編輯。<br />
-                如需修改資料，請聯繫管理員或前往
-                <a href="/" className="underline font-bold ml-1 hover:text-blue-600">
-                  管理後台
-                </a>
+                如需修改資料，請聯繫管理員。
               </p>
             </div>
           </div>
