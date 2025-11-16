@@ -40,14 +40,25 @@ export default function TripSettingsPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
-    await fetch('/api/trip-settings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    })
+    try {
+      const response = await fetch('/api/trip-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
 
-    setShowForm(false)
-    fetchSettings()
+      if (!response.ok) {
+        const errorData = await response.json()
+        alert(`儲存失敗：${errorData.error || '未知錯誤'}`)
+        return
+      }
+
+      setShowForm(false)
+      fetchSettings()
+    } catch (error) {
+      console.error('提交錯誤:', error)
+      alert('儲存失敗，請檢查網路連線或查看控制台錯誤訊息')
+    }
   }
 
   function calculateDays() {
@@ -89,10 +100,9 @@ export default function TripSettingsPage() {
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-6 p-4 bg-white rounded-lg shadow">
           <div className="mb-3">
-            <label className="block mb-1 font-bold">行程名稱 *</label>
+            <label className="block mb-1 font-bold">行程名稱</label>
             <input
               type="text"
-              required
               value={formData.trip_name}
               onChange={e => setFormData({ ...formData, trip_name: e.target.value })}
               className="w-full p-2 border rounded"

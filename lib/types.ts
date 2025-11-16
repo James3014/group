@@ -69,7 +69,7 @@ export interface Task {
 
 export interface TripSettings {
   id: number
-  trip_name: string         // 行程名稱（例如：聖誕節 30人團隊行程管理）
+  trip_name?: string        // 行程名稱（例如：聖誕節 30人團隊行程管理）
   start_date: string
   end_date: string
   location: string
