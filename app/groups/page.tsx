@@ -61,15 +61,26 @@ export default function GroupsPage() {
     const url = isEditing ? `/api/ski-groups/${editingId}` : '/api/ski-groups'
     const method = isEditing ? 'PATCH' : 'POST'
 
-    await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    })
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
 
-    resetForm()
-    setShowForm(false)
-    fetchData()
+      if (!response.ok) {
+        const errorData = await response.json()
+        alert(`儲存失敗：${errorData.error || '未知錯誤'}\n\n請確認：\n1. 資料庫中已有 ski_groups 和 ski_group_members 表格\n2. 表格的 RLS 政策已設定`)
+        return
+      }
+
+      resetForm()
+      setShowForm(false)
+      fetchData()
+    } catch (error) {
+      console.error('提交錯誤:', error)
+      alert('儲存失敗，請檢查網路連線或查看控制台錯誤訊息')
+    }
   }
 
   async function deleteGroup(id: number, name: string) {
