@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase'
 import { generateUniqueSlug } from '@/lib/slug-generator'
 
 /**
@@ -17,7 +17,7 @@ export async function POST(
     const { admin_notes } = body
 
     // 1. 取得申請資料
-    const { data: application, error: appError } = await supabase
+    const { data: application, error: appError } = await supabaseAdmin
       .from('trip_applications')
       .select('*')
       .eq('id', params.id)
@@ -41,7 +41,7 @@ export async function POST(
     )
 
     // 3. 建立 trip 記錄
-    const { data: newTrip, error: tripError } = await supabase
+    const { data: newTrip, error: tripError } = await supabaseAdmin
       .from('trips')
       .insert([
         {
@@ -60,7 +60,7 @@ export async function POST(
     }
 
     // 4. 更新申請狀態
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from('trip_applications')
       .update({
         status: 'approved',

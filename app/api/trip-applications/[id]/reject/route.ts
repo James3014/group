@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase'
 
 /**
  * 拒絕 Trip 申請
@@ -20,7 +20,7 @@ export async function POST(
     }
 
     // 1. 檢查申請是否存在
-    const { data: application, error: appError } = await supabase
+    const { data: application, error: appError } = await supabaseAdmin
       .from('trip_applications')
       .select('*')
       .eq('id', params.id)
@@ -38,7 +38,7 @@ export async function POST(
     }
 
     // 2. 更新申請狀態為 rejected
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from('trip_applications')
       .update({
         status: 'rejected',
