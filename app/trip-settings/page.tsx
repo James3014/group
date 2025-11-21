@@ -27,7 +27,7 @@ export default function TripSettingsPage() {
 
   async function fetchSettings(tripId: string) {
     try {
-      const res = await fetch(buildApiUrl(`/api/trip-settings?trip_id=${tripId}`))
+      const res = await fetch(`/api/trip-settings?trip_id=${tripId}`)
       if (!res.ok) throw new Error('Failed to fetch settings')
 
       const data = await res.json()
@@ -53,8 +53,15 @@ export default function TripSettingsPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (!tripId) {
+      alert('請先登入')
+      window.location.href = '/organizer/login'
+      return
+    }
+
     try {
-      const response = await fetch(buildApiUrl('/api/trip-settings'), {
+      const response = await fetch(`/api/trip-settings?trip_id=${tripId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -68,8 +75,7 @@ export default function TripSettingsPage() {
 
       setShowForm(false)
       // 重新讀取設定，需傳入 trip_id
-      const tripId = localStorage.getItem('organizer_trip_id')
-      if (tripId) fetchSettings(tripId)
+      fetchSettings(tripId)
     } catch (error) {
       console.error('提交錯誤:', error)
       alert('儲存失敗，請檢查網路連線或查看控制台錯誤訊息')

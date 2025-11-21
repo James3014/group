@@ -134,11 +134,32 @@ export default function TransportPage() {
       passenger_ids: formData.passenger_ids,
     }
 
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (!tripId) {
+      alert('請先登入')
+      window.location.href = '/organizer/login'
+      return
+    }
+
+    // 手動驗證日期範圍 (針對手機版)
+    if (tripSettings) {
+      const selectedTime = new Date(formData.departure_time).getTime()
+      const startTime = new Date(`${tripSettings.start_date}T00:00`).getTime()
+      const endTime = new Date(`${tripSettings.end_date}T23:59`).getTime()
+
+      if (selectedTime < startTime || selectedTime > endTime) {
+        setError(`日期必須在行程期間內：${tripSettings.start_date} ~ ${tripSettings.end_date}`)
+        return
+      }
+    }
+
     const isEditing = editingId !== null
     console.log(isEditing ? '準備更新交通工具:' : '準備新增交通工具:', payload)
 
     try {
-      const url = isEditing ? `/api/transport/${editingId}` : '/api/transport'
+      const url = isEditing
+        ? `/api/transport/${editingId}?trip_id=${tripId}`
+        : `/api/transport?trip_id=${tripId}`
       const method = isEditing ? 'PATCH' : 'POST'
 
       const response = await fetch(url, {
@@ -169,8 +190,7 @@ export default function TransportPage() {
       // 成功後才關閉表單
       initializeForm()
       setShowForm(false)
-      const tripId = localStorage.getItem('organizer_trip_id')
-      if (tripId) await fetchData(tripId)
+      await fetchData(tripId)
     } catch (err: any) {
       const errorMsg = err.message || '網路錯誤，請稍後再試'
       console.error(`${isEditing ? '更新' : '新增'}車輛錯誤:`, err)

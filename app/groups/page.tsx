@@ -90,8 +90,11 @@ export default function GroupsPage() {
 
     const newName = prompt('新組別名稱:', group.name) || group.name
 
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (!tripId) return
+
     try {
-      const response = await fetch('/api/ski-groups', {
+      const response = await fetch(`/api/ski-groups?trip_id=${tripId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -109,8 +112,7 @@ export default function GroupsPage() {
         return
       }
 
-      const tripId = localStorage.getItem('organizer_trip_id')
-      if (tripId) fetchData(tripId)
+      fetchData(tripId)
       alert('複製成功！')
     } catch (error) {
       console.error('複製組別錯誤:', error)
@@ -121,8 +123,17 @@ export default function GroupsPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (!tripId) {
+      alert('請先登入')
+      window.location.href = '/organizer/login'
+      return
+    }
+
     const isEditing = editingId !== null
-    const url = isEditing ? `/api/ski-groups/${editingId}` : '/api/ski-groups'
+    const url = isEditing
+      ? `/api/ski-groups/${editingId}?trip_id=${tripId}`
+      : `/api/ski-groups?trip_id=${tripId}`
     const method = isEditing ? 'PATCH' : 'POST'
 
     try {
@@ -140,8 +151,7 @@ export default function GroupsPage() {
 
       resetForm()
       setShowForm(false)
-      const tripId = localStorage.getItem('organizer_trip_id')
-      if (tripId) fetchData(tripId)
+      fetchData(tripId)
     } catch (error) {
       console.error('提交錯誤:', error)
       alert('儲存失敗，請檢查網路連線或查看控制台錯誤訊息')
@@ -151,19 +161,24 @@ export default function GroupsPage() {
   async function deleteGroup(id: number, name: string) {
     if (!confirm(`確定要刪除「${name}」嗎？所有成員分配將被清除。`)) return
 
-    await fetch(`/api/ski-groups/${id}`, { method: 'DELETE' })
     const tripId = localStorage.getItem('organizer_trip_id')
-    if (tripId) fetchData(tripId)
+    if (!tripId) return
+
+    await fetch(`/api/ski-groups/${id}?trip_id=${tripId}`, { method: 'DELETE' })
+    fetchData(tripId)
   }
 
   async function addMemberToGroup(groupId: number, personId: number) {
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (!tripId) return
+
     const group = groups.find(g => g.id === groupId)
     if (!group) return
 
     const newMemberIds = [...(group.member_ids || []), personId]
 
     try {
-      const response = await fetch(`/api/ski-groups/${groupId}`, {
+      const response = await fetch(`/api/ski-groups/${groupId}?trip_id=${tripId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ member_ids: newMemberIds }),
@@ -175,8 +190,7 @@ export default function GroupsPage() {
         return
       }
 
-      const tripId = localStorage.getItem('organizer_trip_id')
-      if (tripId) fetchData(tripId)
+      fetchData(tripId)
     } catch (error) {
       console.error('添加成員錯誤:', error)
       alert('添加成員失敗，請查看控制台錯誤訊息')
@@ -184,13 +198,16 @@ export default function GroupsPage() {
   }
 
   async function removeMemberFromGroup(groupId: number, personId: number) {
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (!tripId) return
+
     const group = groups.find(g => g.id === groupId)
     if (!group) return
 
     const newMemberIds = (group.member_ids || []).filter(id => id !== personId)
 
     try {
-      const response = await fetch(`/api/ski-groups/${groupId}`, {
+      const response = await fetch(`/api/ski-groups/${groupId}?trip_id=${tripId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ member_ids: newMemberIds }),
@@ -202,8 +219,7 @@ export default function GroupsPage() {
         return
       }
 
-      const tripId = localStorage.getItem('organizer_trip_id')
-      if (tripId) fetchData(tripId)
+      fetchData(tripId)
     } catch (error) {
       console.error('移除成員錯誤:', error)
       alert('移除成員失敗，請查看控制台錯誤訊息')

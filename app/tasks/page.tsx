@@ -39,33 +39,42 @@ export default function TasksPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const tripId = localStorage.getItem('organizer_trip_id')
-    if (tripId) {
-      await fetch(`/api/tasks?trip_id=${tripId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-      setFormData({ description: '', assignee_id: undefined })
-      setShowForm(false)
-      fetchData(tripId)
+    if (!tripId) {
+      alert('請先登入')
+      window.location.href = '/organizer/login'
+      return
     }
+
+    await fetch(`/api/tasks?trip_id=${tripId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+    })
+    setFormData({ description: '', assignee_id: undefined })
+    setShowForm(false)
+    fetchData(tripId)
   }
 
   async function toggleComplete(id: number, current: boolean) {
-    await fetch(`/api/tasks/${id}`, {
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (!tripId) return
+
+    await fetch(`/api/tasks/${id}?trip_id=${tripId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ is_completed: !current }),
     })
-    const tripId = localStorage.getItem('organizer_trip_id')
-    if (tripId) fetchData(tripId)
+    fetchData(tripId)
   }
 
   async function deleteTask(id: number) {
     if (!confirm('確定要刪除這個任務嗎？')) return
-    await fetch(`/api/tasks/${id}`, { method: 'DELETE' })
+
     const tripId = localStorage.getItem('organizer_trip_id')
-    if (tripId) fetchData(tripId)
+    if (!tripId) return
+
+    await fetch(`/api/tasks/${id}?trip_id=${tripId}`, { method: 'DELETE' })
+    fetchData(tripId)
   }
 
   if (loading) return <div className="p-4">載入中...</div>

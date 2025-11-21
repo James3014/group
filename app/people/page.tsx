@@ -31,7 +31,7 @@ export default function PeoplePage() {
   }, [])
 
   async function fetchPeople(tripId: string) {
-    const res = await fetch(buildApiUrl(`/api/people?trip_id=${tripId}`))
+    const res = await fetch(`/api/people?trip_id=${tripId}`)
     const data = await res.json()
     setPeople(data)
     setLoading(false)
@@ -55,16 +55,23 @@ export default function PeoplePage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (!tripId) {
+      alert('請先登入')
+      window.location.href = '/organizer/login'
+      return
+    }
+
     if (editingId) {
       // 編輯現有人員
-      await fetch(`/api/people/${editingId}`, {
+      await fetch(`/api/people/${editingId}?trip_id=${tripId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       })
     } else {
       // 新增人員
-      await fetch('/api/people', {
+      await fetch(`/api/people?trip_id=${tripId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -73,9 +80,7 @@ export default function PeoplePage() {
 
     resetForm()
     setShowForm(false)
-    setShowForm(false)
-    const tripId = localStorage.getItem('organizer_trip_id')
-    if (tripId) fetchPeople(tripId)
+    fetchPeople(tripId)
   }
 
   function startEdit(person: Person) {
@@ -99,21 +104,25 @@ export default function PeoplePage() {
   async function deletePerson(id: number, name: string) {
     if (!confirm(`確定要刪除 ${name} 嗎？`)) return
 
-    await fetch(`/api/people/${id}`, {
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (!tripId) return
+
+    await fetch(`/api/people/${id}?trip_id=${tripId}`, {
       method: 'DELETE',
     })
-    const tripId = localStorage.getItem('organizer_trip_id')
-    if (tripId) fetchPeople(tripId)
+    fetchPeople(tripId)
   }
 
   async function toggleConfirm(id: number, current: boolean) {
-    await fetch(`/api/people/${id}`, {
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (!tripId) return
+
+    await fetch(`/api/people/${id}?trip_id=${tripId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ is_confirmed: !current }),
     })
-    const tripId = localStorage.getItem('organizer_trip_id')
-    if (tripId) fetchPeople(tripId)
+    fetchPeople(tripId)
   }
 
   function handleCancel() {

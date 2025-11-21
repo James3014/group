@@ -74,8 +74,17 @@ export default function AnnouncementsPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (!tripId) {
+      alert('請先登入')
+      window.location.href = '/organizer/login'
+      return
+    }
+
     const isEditing = editingId !== null
-    const url = isEditing ? `/api/announcements/${editingId}` : '/api/announcements'
+    const url = isEditing
+      ? `/api/announcements/${editingId}?trip_id=${tripId}`
+      : `/api/announcements?trip_id=${tripId}`
     const method = isEditing ? 'PATCH' : 'POST'
 
     await fetch(url, {
@@ -86,8 +95,7 @@ export default function AnnouncementsPage() {
 
     resetForm()
     setShowForm(false)
-    const tripId = localStorage.getItem('organizer_trip_id')
-    if (tripId) fetchAnnouncements(tripId)
+    fetchAnnouncements(tripId)
   }
 
   function formatDate(dateString: string) {

@@ -85,8 +85,29 @@ export default function MealsPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (!tripId) {
+      alert('請先登入')
+      window.location.href = '/organizer/login'
+      return
+    }
+
+    // 手動驗證日期範圍 (針對手機版)
+    if (tripSettings) {
+      const selectedTime = new Date(formData.meal_time).getTime()
+      const startTime = new Date(`${tripSettings.start_date}T00:00`).getTime()
+      const endTime = new Date(`${tripSettings.end_date}T23:59`).getTime()
+
+      if (selectedTime < startTime || selectedTime > endTime) {
+        alert(`日期必須在行程期間內：${tripSettings.start_date} ~ ${tripSettings.end_date}`)
+        return
+      }
+    }
+
     const isEditing = editingId !== null
-    const url = isEditing ? `/api/meals/${editingId}` : '/api/meals'
+    const url = isEditing
+      ? `/api/meals/${editingId}?trip_id=${tripId}`
+      : `/api/meals?trip_id=${tripId}`
     const method = isEditing ? 'PATCH' : 'POST'
 
     await fetch(url, {
@@ -97,8 +118,8 @@ export default function MealsPage() {
 
     resetForm()
     setShowForm(false)
-    const tripId = localStorage.getItem('organizer_trip_id')
-    if (tripId) fetchData(tripId)
+    const currentTripId = localStorage.getItem('organizer_trip_id')
+    if (currentTripId) fetchData(currentTripId)
   }
 
   function formatDateTime(dateString: string) {
