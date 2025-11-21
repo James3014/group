@@ -60,8 +60,7 @@ export async function POST(request: Request) {
                             trip_name: '🏔️ Demo 行程',
                             start_date: '2025-02-01',
                             end_date: '2025-02-07',
-                            location: '北海道二世谷',
-                            description: '系統自動建立的示範資料'
+                            location: '北海道二世谷'
                         }])
 
                     if (insertError) {
@@ -86,8 +85,7 @@ export async function POST(request: Request) {
                     trip_name: '已修復的 Demo 行程',
                     start_date: '2025-02-01',
                     end_date: '2025-02-07',
-                    location: '北海道二世谷',
-                    description: '系統自動修復的資料'
+                    location: '北海道二世谷'
                 }])
 
                 if (insertError) {
@@ -139,8 +137,7 @@ export async function POST(request: Request) {
                     trip_name: existingTrip.trip_name,
                     start_date: '2025-02-01',
                     end_date: '2025-02-07',
-                    location: '北海道二世谷',
-                    description: '這是系統示範用的範例行程，展示所有功能運作'
+                    location: '北海道二世谷'
                 }])
             }
 
@@ -180,8 +177,7 @@ export async function POST(request: Request) {
                     trip_name: '🏔️ 2025 北海道滑雪團 Demo',
                     start_date: '2025-02-01',
                     end_date: '2025-02-07',
-                    location: '北海道二世谷',
-                    description: '這是系統示範用的範例行程，展示所有功能運作'
+                    location: '北海道二世谷'
                 }
             ])
 
