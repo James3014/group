@@ -45,7 +45,7 @@ export default function HomePage() {
               </a>
             </div>
           </div>
-          
+
           {/* Introduction Banner */}
           <div className="mt-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-md">
             <div className="flex">
@@ -56,7 +56,7 @@ export default function HomePage() {
                 <h3 className="text-sm font-medium text-blue-800">關於本系統</h3>
                 <div className="mt-2 text-sm text-blue-700">
                   <p>
-                    這是一個專為滑雪團設計的協作工具，解決分組、交通、餐飲等協調痛點。<br/>
+                    這是一個專為滑雪團設計的協作工具，解決分組、交通、餐飲等協調痛點。<br />
                     目前下方顯示的是 <strong>{tripSettings?.trip_name || 'James 的滑雪團'}</strong> 的實際運作畫面。
                     如果您也想為您的滑雪團建立一樣的系統，請點擊上方「申請使用」。
                   </p>
@@ -168,3 +168,4 @@ export default function HomePage() {
       </main>
     </div>
   )
+}
