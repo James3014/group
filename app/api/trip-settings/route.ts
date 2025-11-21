@@ -15,8 +15,12 @@ export async function GET(request: Request) {
     .single()
 
   if (error) {
-    // 如果沒有設定，返回 null
-    return NextResponse.json(null)
+    // 如果沒有設定，返回 null，但仍要帶上 Debug Headers
+    const response = NextResponse.json(null)
+    response.headers.set('X-Debug-Trip-ID', String(tripId))
+    response.headers.set('X-Debug-Env-Var', process.env.NEXT_PUBLIC_DEMO_TRIP_ID || 'undefined')
+    response.headers.set('X-Debug-Error', error.message)
+    return response
   }
 
   const response = NextResponse.json(data || null)
