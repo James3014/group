@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase'
 
 /**
  * 更新 Trip（啟用/停用等）
@@ -11,7 +11,7 @@ export async function PATCH(
   try {
     const body = await request.json()
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('trips')
       .update(body)
       .eq('id', params.id)
@@ -49,7 +49,7 @@ export async function DELETE(
       )
     }
 
-    const { error, count } = await supabase
+    const { error, count } = await supabaseAdmin
       .from('trips')
       .delete({ count: 'exact' })
       .eq('id', tripId)
