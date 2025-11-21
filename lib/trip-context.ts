@@ -9,12 +9,6 @@
 
 import { Trip } from './types'
 
-// 預設 trip_id（優先使用環境變數，否則為 1）
-console.log('Debug: NEXT_PUBLIC_DEMO_TRIP_ID =', process.env.NEXT_PUBLIC_DEMO_TRIP_ID)
-const DEFAULT_TRIP_ID = process.env.NEXT_PUBLIC_DEMO_TRIP_ID
-  ? parseInt(process.env.NEXT_PUBLIC_DEMO_TRIP_ID, 10)
-  : 1
-
 /**
  * 從 URL 取得當前的 trip slug
  * 例如：?trip=ski2025 → 'ski2025'
@@ -34,7 +28,15 @@ export function getCurrentTripSlug(): string | null {
  * fetch(`/api/people?trip_id=${tripId}`)
  */
 export function getCurrentTripId(): number {
-  if (typeof window === 'undefined') return DEFAULT_TRIP_ID
+  if (typeof window === 'undefined') {
+    // SSR: 嘗試讀取環境變數，否則回傳 1
+    const envTripId = process.env.NEXT_PUBLIC_DEMO_TRIP_ID
+    if (envTripId) {
+      const parsed = parseInt(envTripId, 10)
+      if (!isNaN(parsed) && parsed > 0) return parsed
+    }
+    return 1
+  }
 
   const params = new URLSearchParams(window.location.search)
   const tripIdParam = params.get('trip_id')
@@ -51,12 +53,26 @@ export function getCurrentTripId(): number {
   const slug = params.get('trip')
   if (slug && slug !== 'default') {
     // TODO: 實作 slug -> id 查詢
-    // 目前暫時回傳預設值
-    return DEFAULT_TRIP_ID
+    // 目前暫時回傳預設值 (動態讀取)
+    const envTripId = process.env.NEXT_PUBLIC_DEMO_TRIP_ID
+    if (envTripId) {
+      const parsed = parseInt(envTripId, 10)
+      if (!isNaN(parsed) && parsed > 0) return parsed
+    }
+    return 1
   }
 
   // 3. 回傳預設值
-  return DEFAULT_TRIP_ID
+  // 修正：動態讀取環境變數
+  const envTripId = process.env.NEXT_PUBLIC_DEMO_TRIP_ID
+  if (envTripId) {
+    const parsed = parseInt(envTripId, 10)
+    if (!isNaN(parsed) && parsed > 0) {
+      return parsed
+    }
+  }
+
+  return 1
 }
 
 /**
@@ -80,7 +96,16 @@ export function getTripIdFromRequest(request: Request): number {
   }
 
   // 沒有 trip_id 參數，使用預設值
-  return DEFAULT_TRIP_ID
+  // 修正：在函式內動態讀取環境變數，確保 Runtime 能抓到值
+  const envTripId = process.env.NEXT_PUBLIC_DEMO_TRIP_ID
+  if (envTripId) {
+    const parsed = parseInt(envTripId, 10)
+    if (!isNaN(parsed) && parsed > 0) {
+      return parsed
+    }
+  }
+
+  return 1 // Fallback to 1
 }
 
 /**
@@ -114,9 +139,14 @@ export async function getTripIdBySlug(slug: string): Promise<number> {
     return tripCache.get(slug)!
   }
 
-  // 預設 slug 直接返回 1
+  // 預設 slug 直接返回預設 ID
   if (slug === 'default') {
-    return DEFAULT_TRIP_ID
+    const envTripId = process.env.NEXT_PUBLIC_DEMO_TRIP_ID
+    if (envTripId) {
+      const parsed = parseInt(envTripId, 10)
+      if (!isNaN(parsed) && parsed > 0) return parsed
+    }
+    return 1
   }
 
   // TODO: 在階段3實作從 Supabase 查詢
@@ -132,5 +162,10 @@ export async function getTripIdBySlug(slug: string): Promise<number> {
   // }
 
   // 找不到，使用預設值
-  return DEFAULT_TRIP_ID
+  const envTripId = process.env.NEXT_PUBLIC_DEMO_TRIP_ID
+  if (envTripId) {
+    const parsed = parseInt(envTripId, 10)
+    if (!isNaN(parsed) && parsed > 0) return parsed
+  }
+  return 1
 }
