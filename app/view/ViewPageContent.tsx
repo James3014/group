@@ -31,7 +31,7 @@ export default function ViewPageContent() {
     return (
         <div className="min-h-screen bg-gray-50 pb-20 md:pb-0">
             {/* Hero Section */}
-            <div className="bg-gradient-to-br from-blue-600 to-blue-800 text-white p-6 md:p-12">
+            <div className="bg-gradient-to-br from-blue-600 to-blue-800 text-white px-6 pt-6 pb-14 md:px-12 md:pt-12 md:pb-16">
                 <div className="max-w-4xl mx-auto">
                     <h1 className="text-3xl md:text-4xl font-bold mb-2">
                         {tripSettings.trip_name || '滑雪團行程'}
