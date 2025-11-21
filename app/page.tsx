@@ -13,6 +13,12 @@ export default function HomePage() {
   async function fetchTripSettings() {
     try {
       const res = await fetch('/api/trip-settings')
+
+      // Log debug headers
+      console.log('Debug: Client Env Var =', process.env.NEXT_PUBLIC_DEMO_TRIP_ID)
+      console.log('Debug: Server Used Trip ID =', res.headers.get('X-Debug-Trip-ID'))
+      console.log('Debug: Server Env Var =', res.headers.get('X-Debug-Env-Var'))
+
       const data = await res.json()
       console.log('Debug: fetchTripSettings data =', data)
       setTripSettings(data)

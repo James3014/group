@@ -19,7 +19,13 @@ export async function GET(request: Request) {
     return NextResponse.json(null)
   }
 
-  return NextResponse.json(data)
+  const response = NextResponse.json(data || null)
+
+  // Debug headers
+  response.headers.set('X-Debug-Trip-ID', String(tripId))
+  response.headers.set('X-Debug-Env-Var', process.env.NEXT_PUBLIC_DEMO_TRIP_ID || 'undefined')
+
+  return response
 }
 
 // 新增或更新行程設定
