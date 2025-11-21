@@ -54,8 +54,11 @@ export default function AnnouncementsPage() {
   async function deleteAnnouncement(id: number, title: string) {
     if (!confirm(`確定要刪除「${title}」嗎？`)) return
 
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (!tripId) return
+
     try {
-      const response = await fetch(`/api/announcements/${id}`, {
+      const response = await fetch(`/api/announcements/${id}?trip_id=${tripId}`, {
         method: 'DELETE',
       })
 

@@ -65,8 +65,11 @@ export default function MealsPage() {
   async function deleteMeal(id: number, name: string) {
     if (!confirm(`確定要刪除「${name}」嗎？`)) return
 
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (!tripId) return
+
     try {
-      const response = await fetch(`/api/meals/${id}`, {
+      const response = await fetch(`/api/meals/${id}?trip_id=${tripId}`, {
         method: 'DELETE',
       })
 
