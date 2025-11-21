@@ -19,16 +19,21 @@ export default function TransportPage() {
   })
 
   useEffect(() => {
-    fetchData()
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (!tripId) {
+      window.location.href = '/organizer/login'
+      return
+    }
+    fetchData(tripId)
   }, [])
 
-  async function fetchData() {
+  async function fetchData(tripId: string) {
     try {
       console.log('開始載入資料...')
       const [transportsRes, peopleRes, tripRes] = await Promise.all([
-        fetch('/api/transport'),
-        fetch('/api/people'),
-        fetch('/api/trip-settings')
+        fetch(`/api/transport?trip_id=${tripId}`),
+        fetch(`/api/people?trip_id=${tripId}`),
+        fetch(`/api/trip-settings?trip_id=${tripId}`)
       ])
       const [transportsData, peopleData, tripData] = await Promise.all([
         transportsRes.json(),
@@ -90,7 +95,7 @@ export default function TransportPage() {
         return
       }
 
-      await fetchData()
+      await fetchData(localStorage.getItem('organizer_trip_id') || '')
     } catch (err) {
       console.error('刪除交通工具錯誤:', err)
       alert('刪除失敗，請稍後再試')
@@ -164,7 +169,8 @@ export default function TransportPage() {
       // 成功後才關閉表單
       initializeForm()
       setShowForm(false)
-      await fetchData()
+      const tripId = localStorage.getItem('organizer_trip_id')
+      if (tripId) await fetchData(tripId)
     } catch (err: any) {
       const errorMsg = err.message || '網路錯誤，請稍後再試'
       console.error(`${isEditing ? '更新' : '新增'}車輛錯誤:`, err)

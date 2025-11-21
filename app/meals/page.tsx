@@ -17,24 +17,34 @@ export default function MealsPage() {
   })
 
   useEffect(() => {
-    fetchData()
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (!tripId) {
+      window.location.href = '/organizer/login'
+      return
+    }
+    fetchData(tripId)
   }, [])
 
-  async function fetchData() {
-    const [mealsRes, peopleRes, tripRes] = await Promise.all([
-      fetch('/api/meals'),
-      fetch('/api/people'),
-      fetch('/api/trip-settings')
-    ])
-    const [mealsData, peopleData, tripData] = await Promise.all([
-      mealsRes.json(),
-      peopleRes.json(),
-      tripRes.json()
-    ])
-    setMeals(mealsData)
-    setPeople(peopleData)
-    setTripSettings(tripData)
-    setLoading(false)
+  async function fetchData(tripId: string) {
+    try {
+      const [mealsRes, peopleRes, tripRes] = await Promise.all([
+        fetch(`/api/meals?trip_id=${tripId}`),
+        fetch(`/api/people?trip_id=${tripId}`),
+        fetch(`/api/trip-settings?trip_id=${tripId}`)
+      ])
+      const [mealsData, peopleData, tripData] = await Promise.all([
+        mealsRes.json(),
+        peopleRes.json(),
+        tripRes.json()
+      ])
+      setMeals(mealsData)
+      setPeople(peopleData)
+      setTripSettings(tripData)
+      setLoading(false)
+    } catch (err) {
+      console.error('載入資料錯誤:', err)
+      setLoading(false)
+    }
   }
 
   function resetForm() {
@@ -65,7 +75,7 @@ export default function MealsPage() {
         return
       }
 
-      await fetchData()
+      await fetchData(localStorage.getItem('organizer_trip_id') || '')
     } catch (err) {
       console.error('刪除餐飲錯誤:', err)
       alert('刪除失敗，請稍後再試')
@@ -87,7 +97,8 @@ export default function MealsPage() {
 
     resetForm()
     setShowForm(false)
-    fetchData()
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (tripId) fetchData(tripId)
   }
 
   function formatDateTime(dateString: string) {

@@ -16,14 +16,24 @@ export default function AnnouncementsPage() {
   })
 
   useEffect(() => {
-    fetchAnnouncements()
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (!tripId) {
+      window.location.href = '/organizer/login'
+      return
+    }
+    fetchAnnouncements(tripId)
   }, [])
 
-  async function fetchAnnouncements() {
-    const res = await fetch(buildApiUrl('/api/announcements'))
-    const data = await res.json()
-    setAnnouncements(data)
-    setLoading(false)
+  async function fetchAnnouncements(tripId: string) {
+    try {
+      const res = await fetch(`/api/announcements?trip_id=${tripId}`)
+      const data = await res.json()
+      setAnnouncements(data)
+      setLoading(false)
+    } catch (err) {
+      console.error('載入公告錯誤:', err)
+      setLoading(false)
+    }
   }
 
   function resetForm() {
@@ -45,7 +55,7 @@ export default function AnnouncementsPage() {
     if (!confirm(`確定要刪除「${title}」嗎？`)) return
 
     try {
-      const response = await fetch(buildApiUrl(`/api/announcements/${id}`), {
+      const response = await fetch(`/api/announcements/${id}`, {
         method: 'DELETE',
       })
 
@@ -54,7 +64,7 @@ export default function AnnouncementsPage() {
         return
       }
 
-      await fetchAnnouncements()
+      await fetchAnnouncements(localStorage.getItem('organizer_trip_id') || '')
     } catch (err) {
       console.error('刪除公告錯誤:', err)
       alert('刪除失敗，請稍後再試')
@@ -76,7 +86,8 @@ export default function AnnouncementsPage() {
 
     resetForm()
     setShowForm(false)
-    fetchAnnouncements()
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (tripId) fetchAnnouncements(tripId)
   }
 
   function formatDate(dateString: string) {

@@ -14,13 +14,18 @@ export default function TasksPage() {
   })
 
   useEffect(() => {
-    fetchData()
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (!tripId) {
+      window.location.href = '/organizer/login'
+      return
+    }
+    fetchData(tripId)
   }, [])
 
-  async function fetchData() {
+  async function fetchData(tripId: string) {
     const [tasksRes, peopleRes] = await Promise.all([
-      fetch('/api/tasks'),
-      fetch('/api/people')
+      fetch(`/api/tasks?trip_id=${tripId}`),
+      fetch(`/api/people?trip_id=${tripId}`)
     ])
     const [tasksData, peopleData] = await Promise.all([
       tasksRes.json(),
@@ -33,14 +38,17 @@ export default function TasksPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    await fetch('/api/tasks', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    })
-    setFormData({ description: '', assignee_id: undefined })
-    setShowForm(false)
-    fetchData()
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (tripId) {
+      await fetch(`/api/tasks?trip_id=${tripId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+      setFormData({ description: '', assignee_id: undefined })
+      setShowForm(false)
+      fetchData(tripId)
+    }
   }
 
   async function toggleComplete(id: number, current: boolean) {
@@ -49,13 +57,15 @@ export default function TasksPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ is_completed: !current }),
     })
-    fetchData()
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (tripId) fetchData(tripId)
   }
 
   async function deleteTask(id: number) {
     if (!confirm('確定要刪除這個任務嗎？')) return
     await fetch(`/api/tasks/${id}`, { method: 'DELETE' })
-    fetchData()
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (tripId) fetchData(tripId)
   }
 
   if (loading) return <div className="p-4">載入中...</div>
