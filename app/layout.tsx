@@ -2,8 +2,14 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: '神居雪場滑雪團 - 行程管理',
-  description: '30人滑雪團隊協調工具',
+  title: 'SkiGroup Manager - 滑雪團行程協調系統',
+  description: '專為滑雪團設計的協作工具，輕鬆管理分組、交通、餐飲',
+  openGraph: {
+    title: 'SkiGroup Manager',
+    description: '專為滑雪團設計的協作工具，輕鬆管理分組、交通、餐飲',
+    type: 'website',
+    locale: 'zh_TW',
+  },
 }
 
 export default function RootLayout({
