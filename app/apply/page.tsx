@@ -73,7 +73,10 @@ export default function ApplyPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">🏂 申請使用滑雪團系統</h1>
-          <p className="text-gray-600">填寫資料，我們會儘速審核</p>
+          <p className="text-gray-600 mb-4">填寫資料，我們會儘速審核</p>
+          <a href="/guide" className="text-sm text-blue-600 hover:text-blue-800 underline">
+            👉 不確定如何使用？先查看系統教學
+          </a>
         </div>
 
         {/* Form */}
