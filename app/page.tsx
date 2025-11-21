@@ -14,7 +14,9 @@ export default function HomePage() {
   async function fetchTripSettings() {
     try {
       setIsLoading(true)
-      const res = await fetch('/api/trip-settings')
+      // 直接從環境變數取得 trip_id，確保 API 端點正確查詢
+      const tripId = process.env.NEXT_PUBLIC_DEMO_TRIP_ID || '1'
+      const res = await fetch(`/api/trip-settings?trip_id=${tripId}`)
       const data = await res.json()
       setTripSettings(data)
     } catch (err) {

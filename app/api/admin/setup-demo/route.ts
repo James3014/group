@@ -33,7 +33,7 @@ export async function POST(request: Request) {
 
                 if (!settings) {
                     // 補上缺少的 Settings
-                    await supabaseAdmin.from('trip_settings').insert([{
+                    const { error: insertError } = await supabaseAdmin.from('trip_settings').insert([{
                         trip_id: targetId,
                         trip_name: '已修復的 Demo 行程',
                         start_date: '2025-02-01',
@@ -41,6 +41,15 @@ export async function POST(request: Request) {
                         location: '北海道二世谷',
                         description: '系統自動修復的資料'
                     }])
+
+                    if (insertError) {
+                        console.error('插入 trip_settings 失敗:', insertError)
+                        return NextResponse.json({
+                            success: false,
+                            error: '無法修復資料',
+                            details: insertError.message
+                        }, { status: 500 })
+                    }
 
                     return NextResponse.json({
                         success: true,
