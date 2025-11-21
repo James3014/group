@@ -9,8 +9,10 @@
 
 import { Trip } from './types'
 
-// 預設 trip_id（向後相容）
-const DEFAULT_TRIP_ID = 1
+// 預設 trip_id（優先使用環境變數，否則為 1）
+const DEFAULT_TRIP_ID = process.env.NEXT_PUBLIC_DEMO_TRIP_ID
+  ? parseInt(process.env.NEXT_PUBLIC_DEMO_TRIP_ID, 10)
+  : 1
 
 /**
  * 從 URL 取得當前的 trip slug

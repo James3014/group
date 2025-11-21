@@ -78,7 +78,9 @@ export default function HomePage() {
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
             📍 當前行程看板
-            <span className="px-2 py-1 bg-gray-200 text-gray-600 text-xs rounded-full font-normal">Trip ID: 1</span>
+            <span className="px-2 py-1 bg-gray-200 text-gray-600 text-xs rounded-full font-normal">
+              Trip ID: {tripSettings?.trip_id || '...'}
+            </span>
           </h2>
           <span className="text-sm text-gray-500">
             地點: {tripSettings?.location || '載入中...'}
