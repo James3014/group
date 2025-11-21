@@ -210,9 +210,13 @@ function ApplicationCard({
         body: JSON.stringify({ admin_notes: adminNotes }),
       })
 
-      if (!response.ok) throw new Error('核准失敗')
+      const data = await response.json()
 
-      alert('✅ 核准成功！')
+      if (!response.ok) {
+        throw new Error(data.error || '核准失敗')
+      }
+
+      alert(`✅ 核准成功！\n\n${data.message || ''}`)
       onReload()
     } catch (error: any) {
       alert(`❌ ${error.message}`)
@@ -233,7 +237,11 @@ function ApplicationCard({
         body: JSON.stringify({ admin_notes: reason }),
       })
 
-      if (!response.ok) throw new Error('拒絕失敗')
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || '拒絕失敗')
+      }
 
       alert('✅ 已拒絕申請')
       onReload()

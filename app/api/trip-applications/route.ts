@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase'
 
 /**
  * Trip 申請 API - Linus 原則
  * - Simple: 直接儲存申請，slug 在核准時生成
  * - Direct: 無複雜驗證，快速回應
  * - Good Taste: 清楚的狀態回傳
+ * - 使用 Admin client 繞過 RLS
  */
 
 // 建立申請
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
     }
 
     // 檢查是否重複申請（相同 email + trip_name + pending 狀態）
-    const { data: existing } = await supabase
+    const { data: existing } = await supabaseAdmin
       .from('trip_applications')
       .select('id')
       .eq('applicant_email', applicant_email)
@@ -48,7 +49,7 @@ export async function POST(request: Request) {
     }
 
     // 建立申請
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('trip_applications')
       .insert([
         {
@@ -80,7 +81,7 @@ export async function GET(request: Request) {
     const url = new URL(request.url)
     const status = url.searchParams.get('status') // pending, approved, rejected, all
 
-    let query = supabase
+    let query = supabaseAdmin
       .from('trip_applications')
       .select('*')
       .order('created_at', { ascending: false })

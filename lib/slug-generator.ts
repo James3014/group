@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabaseAdmin } from './supabase'
 
 /**
  * Slug 生成器 - Linus 原則
@@ -85,9 +85,10 @@ function cleanSlug(slug: string): string | null {
 
 /**
  * 檢查 slug 是否已存在
+ * 使用 admin client 繞過 RLS
  */
 async function slugExists(slug: string): Promise<boolean> {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('trips')
     .select('id')
     .eq('slug', slug)
