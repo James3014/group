@@ -35,14 +35,13 @@ export interface TripApplication {
 export interface Person {
   id: number
   name: string
-  phone?: string
+  line_id?: string
   ski_level: SkiLevel
   board_type: BoardType
   age_group: AgeGroup
   equipment: Equipment
   has_radio: boolean
   is_admin: boolean
-  is_confirmed: boolean
   father_id?: number  // 父親的 ID（僅小孩適用）
   mother_id?: number  // 母親的 ID（僅小孩適用）
   father?: Person     // 父親資訊（查詢時回傳）

@@ -11,7 +11,7 @@ export default function PeoplePage() {
   const [editingId, setEditingId] = useState<number | null>(null)
   const [formData, setFormData] = useState({
     name: '',
-    phone: '',
+    line_id: '',
     ski_level: 'intermediate' as SkiLevel,
     board_type: 'snowboard' as BoardType,
     age_group: 'adult' as AgeGroup,
@@ -40,7 +40,7 @@ export default function PeoplePage() {
   function resetForm() {
     setFormData({
       name: '',
-      phone: '',
+      line_id: '',
       ski_level: 'intermediate',
       board_type: 'snowboard',
       age_group: 'adult',
@@ -86,7 +86,7 @@ export default function PeoplePage() {
   function startEdit(person: Person) {
     setFormData({
       name: person.name,
-      phone: person.phone || '',
+      line_id: person.line_id || '',
       ski_level: person.ski_level,
       board_type: person.board_type,
       age_group: person.age_group,
@@ -113,25 +113,10 @@ export default function PeoplePage() {
     fetchPeople(tripId)
   }
 
-  async function toggleConfirm(id: number, current: boolean) {
-    const tripId = localStorage.getItem('organizer_trip_id')
-    if (!tripId) return
-
-    await fetch(`/api/people/${id}?trip_id=${tripId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ is_confirmed: !current }),
-    })
-    fetchPeople(tripId)
-  }
-
   function handleCancel() {
     resetForm()
     setShowForm(false)
   }
-
-  const confirmed = people.filter(p => p.is_confirmed).length
-  const total = people.length
 
   if (loading) return <div className="p-4">載入中...</div>
 
@@ -141,7 +126,7 @@ export default function PeoplePage() {
         <a href="/" className="text-blue-600 hover:underline mb-2 inline-block">← 返回首頁</a>
         <h1 className="text-3xl font-bold mb-2">👥 人員管理</h1>
         <p className="text-gray-600">
-          已確認：{confirmed}/{total} 人
+          總人數：{people.length} 人
         </p>
       </div>
 
@@ -169,12 +154,13 @@ export default function PeoplePage() {
             />
           </div>
           <div className="mb-3">
-            <label className="block mb-1 font-bold">電話</label>
+            <label className="block mb-1 font-bold">LINE ID</label>
             <input
-              type="tel"
-              value={formData.phone}
-              onChange={e => setFormData({ ...formData, phone: e.target.value })}
+              type="text"
+              value={formData.line_id}
+              onChange={e => setFormData({ ...formData, line_id: e.target.value })}
               className="w-full p-2 border rounded"
+              placeholder="選填，例如：@username"
             />
           </div>
           <div className="mb-3">
@@ -295,7 +281,7 @@ export default function PeoplePage() {
                   {person.name}
                   {person.age_group === 'child' && ' 👶'}
                 </h3>
-                <p className="text-sm text-gray-600">{person.phone || '未填寫電話'}</p>
+                {person.line_id && <p className="text-sm text-gray-600">LINE: {person.line_id}</p>}
                 {(person.father_id || person.mother_id) && (
                   <p className="text-sm text-gray-500">
                     {person.father_id && `父親：${people.find(p => p.id === person.father_id)?.name || '未知'}`}
@@ -326,15 +312,6 @@ export default function PeoplePage() {
                 </div>
               </div>
               <div className="flex gap-2 flex-col ml-4">
-                <button
-                  onClick={() => toggleConfirm(person.id, person.is_confirmed)}
-                  className={`px-3 py-1 rounded text-sm ${person.is_confirmed
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-gray-100 text-gray-600'
-                    }`}
-                >
-                  {person.is_confirmed ? '✓ 已確認' : '未確認'}
-                </button>
                 <button
                   onClick={() => startEdit(person)}
                   className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200"
