@@ -5,6 +5,7 @@ import { TripSettings } from '@/lib/types'
 
 export default function HomePage() {
   const [tripSettings, setTripSettings] = useState<TripSettings | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     fetchTripSettings()
@@ -12,12 +13,63 @@ export default function HomePage() {
 
   async function fetchTripSettings() {
     try {
+      setIsLoading(true)
       const res = await fetch('/api/trip-settings')
       const data = await res.json()
       setTripSettings(data)
     } catch (err) {
       console.error('載入行程設定錯誤:', err)
+    } finally {
+      setIsLoading(false)
     }
+  }
+
+  // Empty State / Setup Needed
+  if (!isLoading && !tripSettings) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-xl shadow-md max-w-md w-full text-center">
+          <div className="text-5xl mb-4">🏔️</div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">尚未建立行程資料</h1>
+          <p className="text-gray-600 mb-6">
+            系統找不到目前的行程設定。這可能是因為這是第一次執行，或者環境變數設定有誤。
+          </p>
+
+          <div className="bg-blue-50 p-4 rounded-lg text-left text-sm mb-6">
+            <p className="font-bold text-blue-900 mb-2">除錯資訊：</p>
+            <ul className="space-y-1 text-blue-800">
+              <li>Env Trip ID: {process.env.NEXT_PUBLIC_DEMO_TRIP_ID || '未設定'}</li>
+            </ul>
+          </div>
+
+          <button
+            onClick={async () => {
+              const btn = document.getElementById('setup-btn') as HTMLButtonElement
+              if (btn) {
+                btn.disabled = true
+                btn.innerText = '建立中...'
+              }
+              try {
+                const res = await fetch('/api/admin/setup-demo', { method: 'POST' })
+                const result = await res.json()
+                if (result.success) {
+                  alert(result.message + '\n\n' + result.instruction)
+                  window.location.reload()
+                } else {
+                  alert('建立失敗: ' + (result.error || '未知錯誤'))
+                }
+              } catch (e) {
+                alert('系統錯誤')
+              }
+            }}
+            id="setup-btn"
+            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition"
+          >
+            🚀 一鍵建立 Demo 資料
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
