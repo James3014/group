@@ -141,48 +141,47 @@ export default function HomePage() {
           </span>
         </div>
 
-        <nav className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-          <Link href="/trip-settings" className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 group">
-            <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">⛷️</div>
-            <h2 className="font-bold text-gray-900">行程設定</h2>
-            <p className="text-xs text-gray-500 mt-1">基本資訊管理</p>
-          </Link>
-          <Link href="/people" className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 group">
-            <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">👥</div>
-            <h2 className="font-bold text-gray-900">人員管理</h2>
-            <p className="text-xs text-gray-500 mt-1">名單與親子關係</p>
-          </Link>
-          <Link href="/groups" className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 group">
-            <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">🏂</div>
-            <h2 className="font-bold text-gray-900">滑雪分組</h2>
-            <p className="text-xs text-gray-500 mt-1">每日分組與教學</p>
-          </Link>
-          <Link href="/announcements" className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 group">
-            <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">📢</div>
-            <h2 className="font-bold text-gray-900">公告系統</h2>
-            <p className="text-xs text-gray-500 mt-1">發布重要通知</p>
-          </Link>
-          <Link href="/meals" className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 group">
-            <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">🍽️</div>
-            <h2 className="font-bold text-gray-900">餐飲安排</h2>
-            <p className="text-xs text-gray-500 mt-1">餐廳與座位</p>
-          </Link>
-          <Link href="/transport" className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 group">
-            <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">🚗</div>
-            <h2 className="font-bold text-gray-900">交通協調</h2>
-            <p className="text-xs text-gray-500 mt-1">車輛與接送</p>
-          </Link>
-          <Link href="/tasks" className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 group">
-            <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">✅</div>
-            <h2 className="font-bold text-gray-900">任務清單</h2>
-            <p className="text-xs text-gray-500 mt-1">待辦事項追蹤</p>
-          </Link>
-          <Link href="/view" className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-sm hover:shadow-md transition border border-blue-100 group">
-            <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">👀</div>
-            <h2 className="font-bold text-blue-900">訪客視角</h2>
-            <p className="text-xs text-blue-700 mt-1">預覽參加者看到的畫面</p>
-          </Link>
-        </nav>
+        <div className="grid md:grid-cols-2 gap-8 mb-12 max-w-4xl mx-auto">
+          {/* 團主入口 */}
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden border-2 border-transparent hover:border-blue-500 transition-all group">
+            <div className="bg-blue-600 p-6 text-white text-center">
+              <div className="text-5xl mb-4">�</div>
+              <h2 className="text-2xl font-bold">我是團主</h2>
+              <p className="text-blue-100 mt-2">管理行程、人員與分組</p>
+            </div>
+            <div className="p-8 text-center">
+              <p className="text-gray-600 mb-6">
+                登入後可編輯所有行程細節，<br />包含人員名單、滑雪分組與公告發布。
+              </p>
+              <Link
+                href="/organizer/login"
+                className="inline-block w-full py-3 px-6 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition shadow-md"
+              >
+                團主登入 →
+              </Link>
+            </div>
+          </div>
+
+          {/* 訪客入口 */}
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden border-2 border-transparent hover:border-green-500 transition-all group">
+            <div className="bg-green-600 p-6 text-white text-center">
+              <div className="text-5xl mb-4">�</div>
+              <h2 className="text-2xl font-bold">我是參加者</h2>
+              <p className="text-green-100 mt-2">查看分組、行程與公告</p>
+            </div>
+            <div className="p-8 text-center">
+              <p className="text-gray-600 mb-6">
+                無需登入即可查看公開資訊，<br />包含每日分組、餐廳與交通安排。
+              </p>
+              <Link
+                href="/view"
+                className="inline-block w-full py-3 px-6 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition shadow-md"
+              >
+                進入訪客視角 →
+              </Link>
+            </div>
+          </div>
+        </div>
 
         {/* 3. Comprehensive Sitemap Footer */}
         <footer className="border-t border-gray-200 pt-8 pb-12">
