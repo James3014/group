@@ -31,15 +31,28 @@ export function getCurrentTripSlug(): string | null {
  * fetch(`/api/people?trip_id=${tripId}`)
  */
 export function getCurrentTripId(): number {
-  const slug = getCurrentTripSlug()
+  if (typeof window === 'undefined') return DEFAULT_TRIP_ID
 
-  // 沒有 trip 參數，使用預設值（向後相容）
-  if (!slug || slug === 'default') {
+  const params = new URLSearchParams(window.location.search)
+  const tripIdParam = params.get('trip_id')
+
+  // 1. 優先檢查直接的 trip_id 參數
+  if (tripIdParam) {
+    const parsed = parseInt(tripIdParam, 10)
+    if (!isNaN(parsed) && parsed > 0) {
+      return parsed
+    }
+  }
+
+  // 2. 檢查 slug (目前尚未實作完整查詢，先保留介面)
+  const slug = params.get('trip')
+  if (slug && slug !== 'default') {
+    // TODO: 實作 slug -> id 查詢
+    // 目前暫時回傳預設值
     return DEFAULT_TRIP_ID
   }
 
-  // TODO: 在階段3實作 slug → trip_id 的查詢
-  // 目前先簡單處理，只支援 default
+  // 3. 回傳預設值
   return DEFAULT_TRIP_ID
 }
 
