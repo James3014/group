@@ -10,6 +10,7 @@
 import { Trip } from './types'
 
 // 預設 trip_id（優先使用環境變數，否則為 1）
+console.log('Debug: NEXT_PUBLIC_DEMO_TRIP_ID =', process.env.NEXT_PUBLIC_DEMO_TRIP_ID)
 const DEFAULT_TRIP_ID = process.env.NEXT_PUBLIC_DEMO_TRIP_ID
   ? parseInt(process.env.NEXT_PUBLIC_DEMO_TRIP_ID, 10)
   : 1

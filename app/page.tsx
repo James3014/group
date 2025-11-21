@@ -14,6 +14,7 @@ export default function HomePage() {
     try {
       const res = await fetch('/api/trip-settings')
       const data = await res.json()
+      console.log('Debug: fetchTripSettings data =', data)
       setTripSettings(data)
     } catch (err) {
       console.error('載入行程設定錯誤:', err)
