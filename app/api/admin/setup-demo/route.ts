@@ -13,51 +13,105 @@ export async function POST(request: Request) {
         const targetId = process.env.NEXT_PUBLIC_DEMO_TRIP_ID ? parseInt(process.env.NEXT_PUBLIC_DEMO_TRIP_ID) : null
 
         if (targetId) {
-            const { data: targetTrip } = await supabaseAdmin
-                .from('trips')
-                .select('id')
-                .eq('id', targetId)
-                .single()
+            // 直接嘗試檢查和修復：如果 settings 不存在就插入
+            const { data: settings, error: settingsCheckError } = await supabaseAdmin
+                .from('trip_settings')
+                .select('*')
+                .eq('trip_id', targetId)
+                .limit(1)
+                .maybeSingle()
 
-            if (!targetTrip) {
-                // 如果指定了 ID 但資料庫沒有，我們嘗試用這個 ID 建立 (如果 DB 允許手動插入 ID)
-                // 注意：通常 SERIAL/IDENTITY 欄位不建議手動插入，但在這種修復場景下可能需要
-                // 這裡我們改為：建立新 Trip，並告訴使用者正確的 ID
-            } else {
-                // 如果 Trip 存在，檢查是否有 Settings
-                const { data: settings } = await supabaseAdmin
-                    .from('trip_settings')
+            if (!settings) {
+                // 需要插入 settings，但先確保 trip 存在
+                const { data: trip } = await supabaseAdmin
+                    .from('trips')
                     .select('id')
-                    .eq('trip_id', targetId)
-                    .single()
+                    .eq('id', targetId)
+                    .maybeSingle()
 
-                if (!settings) {
-                    // 補上缺少的 Settings
-                    const { error: insertError } = await supabaseAdmin.from('trip_settings').insert([{
-                        trip_id: targetId,
-                        trip_name: '已修復的 Demo 行程',
-                        start_date: '2025-02-01',
-                        end_date: '2025-02-07',
-                        location: '北海道二世谷',
-                        description: '系統自動修復的資料'
-                    }])
+                if (!trip) {
+                    // Trip 不存在，創建一個新的（自動 ID）
+                    const { data: newTrip, error: tripCreateError } = await supabaseAdmin
+                        .from('trips')
+                        .insert([{
+                            slug: `demo-trip-${Date.now()}`,
+                            trip_name: '🏔️ Demo 行程',
+                            owner_email: 'demo@diyski.example.com',
+                            is_active: true,
+                        }])
+                        .select()
+                        .single()
+
+                    if (tripCreateError) {
+                        console.error('建立 Trip 失敗:', tripCreateError)
+                        return NextResponse.json({
+                            success: false,
+                            error: '無法建立行程',
+                            details: tripCreateError.message
+                        }, { status: 500 })
+                    }
+
+                    // 使用新建立的 trip ID
+                    const newTripId = newTrip.id
+                    const { error: insertError } = await supabaseAdmin
+                        .from('trip_settings')
+                        .insert([{
+                            trip_id: newTripId,
+                            trip_name: '🏔️ Demo 行程',
+                            start_date: '2025-02-01',
+                            end_date: '2025-02-07',
+                            location: '北海道二世谷',
+                            description: '系統自動建立的示範資料'
+                        }])
 
                     if (insertError) {
                         console.error('插入 trip_settings 失敗:', insertError)
                         return NextResponse.json({
                             success: false,
-                            error: '無法修復資料',
+                            error: '無法建立行程設定',
                             details: insertError.message
                         }, { status: 500 })
                     }
 
                     return NextResponse.json({
                         success: true,
-                        message: `已修復 Trip ID ${targetId} 的資料`,
-                        instruction: '請重新整理頁面'
+                        message: `✅ Demo 行程已建立 (ID: ${newTripId})`,
+                        instruction: `請在 Zeabur 環境變數設定 NEXT_PUBLIC_DEMO_TRIP_ID=${newTripId}，然後重新部署`
                     })
                 }
+
+                // Trip 存在，直接插入 settings
+                const { error: insertError } = await supabaseAdmin.from('trip_settings').insert([{
+                    trip_id: targetId,
+                    trip_name: '已修復的 Demo 行程',
+                    start_date: '2025-02-01',
+                    end_date: '2025-02-07',
+                    location: '北海道二世谷',
+                    description: '系統自動修復的資料'
+                }])
+
+                if (insertError) {
+                    console.error('插入 trip_settings 失敗:', insertError)
+                    return NextResponse.json({
+                        success: false,
+                        error: '無法修復資料',
+                        details: insertError.message
+                    }, { status: 500 })
+                }
+
+                return NextResponse.json({
+                    success: true,
+                    message: `已修復 Trip ID ${targetId} 的資料`,
+                    instruction: '請重新整理頁面'
+                })
             }
+
+            // Settings 已存在，返回成功
+            return NextResponse.json({
+                success: true,
+                message: `Trip ID ${targetId} 的資料已就緒`,
+                instruction: '請重新整理頁面'
+            })
         }
 
         // 1. 檢查是否已存在 Demo Trip (by slug)
