@@ -107,21 +107,19 @@ export default function AdminTripsPage() {
             <nav className="flex -mb-px">
               <button
                 onClick={() => setActiveTab('applications')}
-                className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'applications'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === 'applications'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
               >
                 待審核申請 {applications.length > 0 && `(${applications.length})`}
               </button>
               <button
                 onClick={() => setActiveTab('trips')}
-                className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'trips'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === 'trips'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
               >
                 所有 Trips ({trips.length})
               </button>
@@ -315,9 +313,45 @@ function TripRow({ trip, onReload }: { trip: Trip; onReload: () => void }) {
     }
   }
 
+  const handleDelete = async () => {
+    if (trip.id === 5) {
+      alert('🔒 Demo Trip (ID=5) 受保護，不可刪除\n\n這是系統展示用的範例資料，請勿刪除。')
+      return
+    }
+
+    if (!confirm(`⚠️ 確定要刪除「${trip.trip_name}」嗎？\n\n此操作無法復原，所有相關資料都會被刪除！`)) return
+
+    setProcessing(true)
+    try {
+      const response = await fetch(`/api/trips/${trip.id}`, {
+        method: 'DELETE',
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || '刪除失敗')
+      }
+
+      alert('✅ 刪除成功！')
+      onReload()
+    } catch (error: any) {
+      alert(`❌ ${error.message}`)
+    } finally {
+      setProcessing(false)
+    }
+  }
+
+  const isDemoTrip = trip.id === 5
+
   return (
     <tr className="hover:bg-gray-50">
-      <td className="px-6 py-4 text-sm text-gray-900">{trip.id}</td>
+      <td className="px-6 py-4 text-sm text-gray-900">
+        {trip.id}
+        {isDemoTrip && (
+          <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">Demo</span>
+        )}
+      </td>
       <td className="px-6 py-4 text-sm font-medium text-gray-900">{trip.trip_name}</td>
       <td className="px-6 py-4 text-sm text-gray-600">
         <code className="px-2 py-1 bg-gray-100 rounded text-xs">{trip.slug}</code>
@@ -325,27 +359,38 @@ function TripRow({ trip, onReload }: { trip: Trip; onReload: () => void }) {
       <td className="px-6 py-4 text-sm text-gray-600">{trip.owner_email}</td>
       <td className="px-6 py-4">
         <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${
-            trip.is_active
-              ? 'bg-green-100 text-green-700'
-              : 'bg-gray-100 text-gray-700'
-          }`}
+          className={`px-2 py-1 rounded-full text-xs font-medium ${trip.is_active
+            ? 'bg-green-100 text-green-700'
+            : 'bg-gray-100 text-gray-700'
+            }`}
         >
           {trip.is_active ? '啟用中' : '已停用'}
         </span>
       </td>
       <td className="px-6 py-4 text-sm">
-        <button
-          onClick={handleToggleActive}
-          disabled={processing}
-          className={`px-3 py-1 rounded text-xs font-medium ${
-            trip.is_active
+        <div className="flex gap-2">
+          <button
+            onClick={handleToggleActive}
+            disabled={processing}
+            className={`px-3 py-1 rounded text-xs font-medium ${trip.is_active
               ? 'bg-gray-200 hover:bg-gray-300 text-gray-700'
               : 'bg-green-600 hover:bg-green-700 text-white'
-          } disabled:opacity-50`}
-        >
-          {trip.is_active ? '停用' : '啟用'}
-        </button>
+              } disabled:opacity-50`}
+          >
+            {trip.is_active ? '停用' : '啟用'}
+          </button>
+          <button
+            onClick={handleDelete}
+            disabled={processing || isDemoTrip}
+            className={`px-3 py-1 rounded text-xs font-medium ${isDemoTrip
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-red-600 hover:bg-red-700 text-white'
+              } disabled:opacity-50`}
+            title={isDemoTrip ? 'Demo Trip 受保護，不可刪除' : '刪除此 Trip'}
+          >
+            刪除
+          </button>
+        </div>
       </td>
     </tr>
   )

@@ -6,7 +6,7 @@ export default function GuidePage() {
             <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
                 {/* Header */}
                 <div className="bg-blue-600 px-8 py-10 text-white">
-                    <h1 className="text-4xl font-bold mb-4">🏂 DIY Ski Trip Planner 系統功能介紹</h1>
+                    <h1 className="text-4xl font-bold mb-4">🏂 SkiGroup Manager 系統功能介紹</h1>
                     <p className="text-blue-100 text-lg">
                         專為滑雪團設計的協作工具，解決分組、交通、餐飲等協調痛點。
                         <br />以下為系統功能展示與使用說明。

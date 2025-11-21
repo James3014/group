@@ -81,7 +81,7 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">🏂 DIY Ski Trip Planner</h1>
+              <h1 className="text-2xl font-bold text-gray-900">🏂 SkiGroup Manager</h1>
               <p className="text-sm text-gray-500">滑雪團行程協調系統 - 讓多人滑雪更簡單</p>
             </div>
             <div className="flex gap-3">
@@ -223,7 +223,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-gray-100 text-center text-xs text-gray-400">
-            <p>&copy; 2025 DIY Ski Trip Planner. Built with ❤️ by James.</p>
+            <p>&copy; 2025 SkiGroup Manager. Built with ❤️ by James.</p>
           </div>
         </footer>
       </main>
