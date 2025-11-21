@@ -84,15 +84,9 @@ export default function ViewPeopleContent() {
         return sorted
     }
 
-    const confirmed = people.filter(p => p.is_confirmed)
-    const pending = people.filter(p => !p.is_confirmed)
-
     // 搜尋過濾並按家庭排序
-    const filteredConfirmed = sortByFamily(
-        confirmed.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    )
-    const filteredPending = sortByFamily(
-        pending.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    const filteredPeople = sortByFamily(
+        people.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
     )
 
     if (loading) return (
@@ -111,12 +105,6 @@ export default function ViewPeopleContent() {
                     </a>
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">👥 參加人員名單</h1>
                     <div className="flex items-center gap-4 text-gray-600">
-                        <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full font-bold">
-                            ✓ 已確認：{confirmed.length} 人
-                        </span>
-                        <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full font-bold">
-                            待確認：{pending.length} 人
-                        </span>
                         <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full font-bold">
                             總計：{people.length} 人
                         </span>
@@ -136,37 +124,14 @@ export default function ViewPeopleContent() {
                     />
                 </div>
 
-                {/* 已確認人員 */}
-                <div className="mb-8">
-                    <h2 className="text-2xl font-bold mb-4 text-green-800 flex items-center gap-2">
-                        <span>✓</span>
-                        <span>已確認參加</span>
-                        <span className="text-lg text-gray-500">({filteredConfirmed.length})</span>
-                    </h2>
-                    <div className="grid md:grid-cols-2 gap-4">
-                        {filteredConfirmed.map(person => (
-                            <PersonCard key={person.id} person={person} people={people} />
-                        ))}
-                    </div>
-                    {filteredConfirmed.length === 0 && (
-                        <p className="text-gray-400 text-center py-8">沒有符合的結果</p>
-                    )}
+                {/* 人員列表 */}
+                <div className="grid md:grid-cols-2 gap-4">
+                    {filteredPeople.map(person => (
+                        <PersonCard key={person.id} person={person} people={people} />
+                    ))}
                 </div>
-
-                {/* 待確認人員 */}
-                {filteredPending.length > 0 && (
-                    <div>
-                        <h2 className="text-2xl font-bold mb-4 text-gray-600 flex items-center gap-2">
-                            <span>⏳</span>
-                            <span>待確認</span>
-                            <span className="text-lg text-gray-500">({filteredPending.length})</span>
-                        </h2>
-                        <div className="grid md:grid-cols-2 gap-4">
-                            {filteredPending.map(person => (
-                                <PersonCard key={person.id} person={person} people={people} />
-                            ))}
-                        </div>
-                    </div>
+                {filteredPeople.length === 0 && (
+                    <p className="text-gray-400 text-center py-8">沒有符合的結果</p>
                 )}
             </div>
         </div>
@@ -175,24 +140,14 @@ export default function ViewPeopleContent() {
 
 function PersonCard({ person, people }: { person: Person; people: Person[] }) {
     return (
-        <div className={`p-5 rounded-lg shadow-md border-l-4 ${person.is_confirmed
-            ? 'bg-white border-green-500'
-            : 'bg-gray-50 border-gray-400'
-            }`}>
-            <div className="flex items-start justify-between mb-3">
-                <div>
-                    <h3 className="text-xl font-bold text-gray-900">
-                        {person.name}
-                        {person.age_group === 'child' && ' 👶'}
-                    </h3>
-                    {person.phone && (
-                        <p className="text-sm text-gray-600 mt-1">📱 {person.phone}</p>
-                    )}
-                </div>
-                {person.is_confirmed && (
-                    <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-sm font-bold">
-                        ✓
-                    </span>
+        <div className="p-5 rounded-lg shadow-md border-l-4 bg-white border-blue-500">
+            <div className="mb-3">
+                <h3 className="text-xl font-bold text-gray-900">
+                    {person.name}
+                    {person.age_group === 'child' && ' 👶'}
+                </h3>
+                {person.line_id && (
+                    <p className="text-sm text-gray-600 mt-1">LINE: {person.line_id}</p>
                 )}
             </div>
 
