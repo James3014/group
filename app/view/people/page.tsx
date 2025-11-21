@@ -3,20 +3,30 @@
 import { useEffect, useState } from 'react'
 import { Person } from '@/lib/types'
 
+import { useSearchParams } from 'next/navigation'
+
 export default function ViewPeoplePage() {
+  const searchParams = useSearchParams()
+  const tripId = searchParams.get('trip_id') || process.env.NEXT_PUBLIC_DEMO_TRIP_ID || '1'
+
   const [people, setPeople] = useState<Person[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
     fetchPeople()
-  }, [])
+  }, [tripId])
 
   async function fetchPeople() {
-    const res = await fetch('/api/people')
-    const data = await res.json()
-    setPeople(data)
-    setLoading(false)
+    try {
+      const res = await fetch(`/api/people?trip_id=${tripId}`)
+      const data = await res.json()
+      setPeople(data)
+      setLoading(false)
+    } catch (error) {
+      console.error("Failed to fetch people:", error)
+      setLoading(false)
+    }
   }
 
   // 將有親子關係的人排在一起
@@ -166,11 +176,10 @@ export default function ViewPeoplePage() {
 
 function PersonCard({ person, people }: { person: Person; people: Person[] }) {
   return (
-    <div className={`p-5 rounded-lg shadow-md border-l-4 ${
-      person.is_confirmed
-        ? 'bg-white border-green-500'
-        : 'bg-gray-50 border-gray-400'
-    }`}>
+    <div className={`p-5 rounded-lg shadow-md border-l-4 ${person.is_confirmed
+      ? 'bg-white border-green-500'
+      : 'bg-gray-50 border-gray-400'
+      }`}>
       <div className="flex items-start justify-between mb-3">
         <div>
           <h3 className="text-xl font-bold text-gray-900">
@@ -223,11 +232,10 @@ function PersonCard({ person, people }: { person: Person; people: Person[] }) {
       <div className="grid grid-cols-2 gap-2 text-sm">
         <div className="flex items-center gap-2">
           <span className="font-bold text-gray-700">技術等級：</span>
-          <span className={`px-2 py-0.5 rounded font-bold ${
-            person.ski_level === 'beginner' ? 'bg-yellow-100 text-yellow-800' :
+          <span className={`px-2 py-0.5 rounded font-bold ${person.ski_level === 'beginner' ? 'bg-yellow-100 text-yellow-800' :
             person.ski_level === 'intermediate' ? 'bg-blue-100 text-blue-800' :
-            'bg-purple-100 text-purple-800'
-          }`}>
+              'bg-purple-100 text-purple-800'
+            }`}>
             {person.ski_level === 'beginner' && '初級'}
             {person.ski_level === 'intermediate' && '中級'}
             {person.ski_level === 'advanced' && '高級'}

@@ -118,7 +118,7 @@ export default function OrganizerDashboard() {
                     </Link>
 
                     {/* 預覽 */}
-                    <Link href="/view" target="_blank" className="group bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-xl shadow-sm hover:shadow-md transition text-white">
+                    <Link href={`/view?trip_id=${tripId}`} target="_blank" className="group bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-xl shadow-sm hover:shadow-md transition text-white">
                         <div className="flex justify-between items-start mb-4">
                             <div className="p-3 bg-white/10 rounded-lg text-2xl group-hover:scale-110 transition">👀</div>
                             <span className="text-xs font-bold text-white/80 bg-white/20 px-2 py-1 rounded">預覽</span>

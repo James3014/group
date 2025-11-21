@@ -3,19 +3,21 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { TripSettings } from '@/lib/types'
+import { useSearchParams } from 'next/navigation'
 
 export default function ParticipantHomePage() {
+  const searchParams = useSearchParams()
+  const tripId = searchParams.get('trip_id') || process.env.NEXT_PUBLIC_DEMO_TRIP_ID || '1'
+
   const [tripSettings, setTripSettings] = useState<TripSettings | null>(null)
   const [todayDate] = useState(new Date().toISOString().split('T')[0])
 
   useEffect(() => {
     fetchTripSettings()
-  }, [])
+  }, [tripId])
 
   async function fetchTripSettings() {
     try {
-      // 使用環境變數中的 trip_id，確保與首頁邏輯一致
-      const tripId = process.env.NEXT_PUBLIC_DEMO_TRIP_ID || '1'
       const res = await fetch(`/api/trip-settings?trip_id=${tripId}`)
       const data = await res.json()
       setTripSettings(data)

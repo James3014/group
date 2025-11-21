@@ -3,7 +3,12 @@
 import { useEffect, useState } from 'react'
 import { Person, SkiGroup, SkiSession } from '@/lib/types'
 
+import { useSearchParams } from 'next/navigation'
+
 export default function ViewGroupsPage() {
+  const searchParams = useSearchParams()
+  const tripId = searchParams.get('trip_id') || process.env.NEXT_PUBLIC_DEMO_TRIP_ID || '1'
+
   const [groups, setGroups] = useState<SkiGroup[]>([])
   const [people, setPeople] = useState<Person[]>([])
   const [loading, setLoading] = useState(true)
@@ -13,13 +18,13 @@ export default function ViewGroupsPage() {
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [tripId])
 
   async function fetchData() {
     try {
       const [groupsRes, peopleRes] = await Promise.all([
-        fetch('/api/ski-groups'),
-        fetch('/api/people')
+        fetch(`/api/ski-groups?trip_id=${tripId}`),
+        fetch(`/api/people?trip_id=${tripId}`)
       ])
       const [groupsData, peopleData] = await Promise.all([
         groupsRes.json(),
@@ -213,11 +218,10 @@ function MemberCard({ person, people, highlight }: { person: Person; people: Per
   const mother = person.mother_id ? people.find(p => p.id === person.mother_id) : null
 
   return (
-    <div className={`p-3 rounded-lg border-2 transition-all ${
-      highlight
+    <div className={`p-3 rounded-lg border-2 transition-all ${highlight
         ? 'bg-yellow-50 border-yellow-400 shadow-lg'
         : 'bg-gray-50 border-gray-200'
-    }`}>
+      }`}>
       <div className="flex items-start justify-between mb-2">
         <h4 className="font-bold text-gray-900">
           {person.name}
@@ -230,11 +234,10 @@ function MemberCard({ person, people, highlight }: { person: Person; people: Per
 
       <div className="text-xs space-y-1">
         <div className="flex items-center gap-2">
-          <span className={`px-2 py-0.5 rounded font-bold ${
-            person.ski_level === 'beginner' ? 'bg-yellow-100 text-yellow-800' :
-            person.ski_level === 'intermediate' ? 'bg-blue-100 text-blue-800' :
-            'bg-purple-100 text-purple-800'
-          }`}>
+          <span className={`px-2 py-0.5 rounded font-bold ${person.ski_level === 'beginner' ? 'bg-yellow-100 text-yellow-800' :
+              person.ski_level === 'intermediate' ? 'bg-blue-100 text-blue-800' :
+                'bg-purple-100 text-purple-800'
+            }`}>
             {person.ski_level === 'beginner' && '初級'}
             {person.ski_level === 'intermediate' && '中級'}
             {person.ski_level === 'advanced' && '高級'}
