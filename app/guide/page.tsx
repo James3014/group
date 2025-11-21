@@ -39,7 +39,7 @@ export default function GuidePage() {
                                         </div>
                                     </li>
                                     <li className="flex gap-3">
-                                        <span className="font-mono bg-gray-100 px-2 py-1 rounded text-sm text-gray-600 h-fit">/view/page</span>
+                                        <span className="font-mono bg-gray-100 px-2 py-1 rounded text-sm text-gray-600 h-fit">/view</span>
                                         <div>
                                             <span className="font-bold text-gray-900">訪客唯讀模式</span>
                                             <p className="text-sm text-gray-600">模擬一般參加者看到的畫面。</p>

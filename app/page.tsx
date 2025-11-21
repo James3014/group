@@ -177,7 +177,7 @@ export default function HomePage() {
             <h2 className="font-bold text-gray-900">任務清單</h2>
             <p className="text-xs text-gray-500 mt-1">待辦事項追蹤</p>
           </Link>
-          <Link href="/view/page" className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-sm hover:shadow-md transition border border-blue-100 group">
+          <Link href="/view" className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-sm hover:shadow-md transition border border-blue-100 group">
             <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">👀</div>
             <h2 className="font-bold text-blue-900">訪客視角</h2>
             <p className="text-xs text-blue-700 mt-1">預覽參加者看到的畫面</p>
@@ -195,7 +195,7 @@ export default function HomePage() {
               <ul className="space-y-2">
                 <li><Link href="/" className="text-gray-600 hover:text-blue-600">首頁 (Dashboard)</Link></li>
                 <li><Link href="/apply" className="text-gray-600 hover:text-blue-600">申請使用</Link></li>
-                <li><Link href="/view/page" className="text-gray-600 hover:text-blue-600">訪客唯讀模式</Link></li>
+                <li><Link href="/view" className="text-gray-600 hover:text-blue-600">訪客唯讀模式</Link></li>
               </ul>
             </div>
             <div>
