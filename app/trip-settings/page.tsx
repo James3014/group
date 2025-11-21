@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { TripSettings } from '@/lib/types'
+import { buildApiUrl } from '@/lib/trip-context'
 
 export default function TripSettingsPage() {
   const [settings, setSettings] = useState<TripSettings | null>(null)
@@ -20,7 +21,7 @@ export default function TripSettingsPage() {
   }, [])
 
   async function fetchSettings() {
-    const res = await fetch('/api/trip-settings')
+    const res = await fetch(buildApiUrl('/api/trip-settings'))
     const data = await res.json()
     setSettings(data)
     setLoading(false)
@@ -41,7 +42,7 @@ export default function TripSettingsPage() {
     e.preventDefault()
 
     try {
-      const response = await fetch('/api/trip-settings', {
+      const response = await fetch(buildApiUrl('/api/trip-settings'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

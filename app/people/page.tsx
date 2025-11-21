@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Person, SkiLevel, BoardType, AgeGroup, Equipment } from '@/lib/types'
+import { buildApiUrl } from '@/lib/trip-context'
 
 export default function PeoplePage() {
   const [people, setPeople] = useState<Person[]>([])
@@ -25,7 +26,7 @@ export default function PeoplePage() {
   }, [])
 
   async function fetchPeople() {
-    const res = await fetch('/api/people')
+    const res = await fetch(buildApiUrl('/api/people'))
     const data = await res.json()
     setPeople(data)
     setLoading(false)

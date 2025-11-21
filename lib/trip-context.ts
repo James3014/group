@@ -109,14 +109,22 @@ export function getTripIdFromRequest(request: Request): number {
 }
 
 /**
- * 建立帶有 trip_id 的 API URL
+ * 建立帶有 trip_id 的 API URL (客戶端友好版本)
  *
  * 使用方式：
  * const url = buildApiUrl('/api/people')
- * // → '/api/people?trip_id=1'
+ * // → '/api/people?trip_id=5' (如果環境變數設定為 5)
+ *
+ * 特點：
+ * - 自動讀取環境變數 NEXT_PUBLIC_DEMO_TRIP_ID
+ * - 支持已有查詢參數的 URL
+ * - 客戶端和伺服器端都可用
  */
 export function buildApiUrl(path: string): string {
-  const tripId = getCurrentTripId()
+  // 在客戶端，直接使用編譯時的環境變數
+  const envTripId = typeof window !== 'undefined' ? process.env.NEXT_PUBLIC_DEMO_TRIP_ID : null
+  const tripId = envTripId ? parseInt(envTripId, 10) : 1
+
   const separator = path.includes('?') ? '&' : '?'
   return `${path}${separator}trip_id=${tripId}`
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Announcement } from '@/lib/types'
+import { buildApiUrl } from '@/lib/trip-context'
 
 export default function AnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
@@ -19,7 +20,7 @@ export default function AnnouncementsPage() {
   }, [])
 
   async function fetchAnnouncements() {
-    const res = await fetch('/api/announcements')
+    const res = await fetch(buildApiUrl('/api/announcements'))
     const data = await res.json()
     setAnnouncements(data)
     setLoading(false)
@@ -44,7 +45,7 @@ export default function AnnouncementsPage() {
     if (!confirm(`確定要刪除「${title}」嗎？`)) return
 
     try {
-      const response = await fetch(`/api/announcements/${id}`, {
+      const response = await fetch(buildApiUrl(`/api/announcements/${id}`), {
         method: 'DELETE',
       })
 
