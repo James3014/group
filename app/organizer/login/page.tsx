@@ -64,7 +64,7 @@ export default function OrganizerLoginPage() {
                             value={tripId}
                             onChange={(e) => setTripId(e.target.value)}
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="例如：1"
+                            placeholder="請輸入您的 Trip ID"
                         />
                     </div>
 
@@ -76,7 +76,7 @@ export default function OrganizerLoginPage() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="預設為 123456"
+                            placeholder="請輸入密碼"
                         />
                     </div>
 

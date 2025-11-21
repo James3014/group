@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase'
 
 /**
- * Trips API - 獲取所有 trips
+ * Trips API - 獲取所有 trips（Admin only）
  */
 export async function GET(request: Request) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('trips')
       .select('*')
       .order('created_at', { ascending: false })
