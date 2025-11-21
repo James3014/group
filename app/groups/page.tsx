@@ -22,14 +22,19 @@ export default function GroupsPage() {
   })
 
   useEffect(() => {
-    fetchData()
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (!tripId) {
+      window.location.href = '/organizer/login'
+      return
+    }
+    fetchData(tripId)
   }, [])
 
-  async function fetchData() {
+  async function fetchData(tripId: string) {
     try {
       const [groupsRes, peopleRes] = await Promise.all([
-        fetch('/api/ski-groups'),
-        fetch('/api/people')
+        fetch(`/api/ski-groups?trip_id=${tripId}`),
+        fetch(`/api/people?trip_id=${tripId}`)
       ])
       const [groupsData, peopleData] = await Promise.all([
         groupsRes.json(),
@@ -104,7 +109,8 @@ export default function GroupsPage() {
         return
       }
 
-      fetchData()
+      const tripId = localStorage.getItem('organizer_trip_id')
+      if (tripId) fetchData(tripId)
       alert('複製成功！')
     } catch (error) {
       console.error('複製組別錯誤:', error)
@@ -134,7 +140,8 @@ export default function GroupsPage() {
 
       resetForm()
       setShowForm(false)
-      fetchData()
+      const tripId = localStorage.getItem('organizer_trip_id')
+      if (tripId) fetchData(tripId)
     } catch (error) {
       console.error('提交錯誤:', error)
       alert('儲存失敗，請檢查網路連線或查看控制台錯誤訊息')
@@ -145,7 +152,8 @@ export default function GroupsPage() {
     if (!confirm(`確定要刪除「${name}」嗎？所有成員分配將被清除。`)) return
 
     await fetch(`/api/ski-groups/${id}`, { method: 'DELETE' })
-    fetchData()
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (tripId) fetchData(tripId)
   }
 
   async function addMemberToGroup(groupId: number, personId: number) {
@@ -167,7 +175,8 @@ export default function GroupsPage() {
         return
       }
 
-      fetchData()
+      const tripId = localStorage.getItem('organizer_trip_id')
+      if (tripId) fetchData(tripId)
     } catch (error) {
       console.error('添加成員錯誤:', error)
       alert('添加成員失敗，請查看控制台錯誤訊息')
@@ -193,7 +202,8 @@ export default function GroupsPage() {
         return
       }
 
-      fetchData()
+      const tripId = localStorage.getItem('organizer_trip_id')
+      if (tripId) fetchData(tripId)
     } catch (error) {
       console.error('移除成員錯誤:', error)
       alert('移除成員失敗，請查看控制台錯誤訊息')

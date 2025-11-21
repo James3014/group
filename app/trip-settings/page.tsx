@@ -17,24 +17,36 @@ export default function TripSettingsPage() {
   })
 
   useEffect(() => {
-    fetchSettings()
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (!tripId) {
+      window.location.href = '/organizer/login'
+      return
+    }
+    fetchSettings(tripId)
   }, [])
 
-  async function fetchSettings() {
-    const res = await fetch(buildApiUrl('/api/trip-settings'))
-    const data = await res.json()
-    setSettings(data)
-    setLoading(false)
+  async function fetchSettings(tripId: string) {
+    try {
+      const res = await fetch(buildApiUrl(`/api/trip-settings?trip_id=${tripId}`))
+      if (!res.ok) throw new Error('Failed to fetch settings')
 
-    // 如果有現有設定，填入表單
-    if (data) {
-      setFormData({
-        trip_name: data.trip_name || '',
-        start_date: data.start_date,
-        end_date: data.end_date,
-        location: data.location || '神居滑雪場',
-        notes: data.notes || '',
-      })
+      const data = await res.json()
+      setSettings(data)
+
+      // 如果有現有設定，填入表單
+      if (data) {
+        setFormData({
+          trip_name: data.trip_name || '',
+          start_date: data.start_date,
+          end_date: data.end_date,
+          location: data.location || '神居滑雪場',
+          notes: data.notes || '',
+        })
+      }
+    } catch (err) {
+      console.error('Error fetching settings:', err)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -55,7 +67,9 @@ export default function TripSettingsPage() {
       }
 
       setShowForm(false)
-      fetchSettings()
+      // 重新讀取設定，需傳入 trip_id
+      const tripId = localStorage.getItem('organizer_trip_id')
+      if (tripId) fetchSettings(tripId)
     } catch (error) {
       console.error('提交錯誤:', error)
       alert('儲存失敗，請檢查網路連線或查看控制台錯誤訊息')

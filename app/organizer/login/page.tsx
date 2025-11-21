@@ -36,9 +36,8 @@ export default function OrganizerLoginPage() {
             // 2. 設定 Cookie (為了 Middleware)
             document.cookie = `trip_token=${data.token}; path=/; max-age=86400; SameSite=Strict`
 
-            // 3. 跳轉到管理首頁 (目前暫定為 /trip-settings 或新的 /organizer/dashboard)
-            // 為了兼容現有路徑，我們先跳轉到 /trip-settings，但這需要我們在下一步保護該頁面
-            router.push('/trip-settings')
+            // 3. 跳轉到管理首頁
+            router.push('/organizer/dashboard')
 
         } catch (err: any) {
             setError(err.message)

@@ -22,11 +22,16 @@ export default function PeoplePage() {
   })
 
   useEffect(() => {
-    fetchPeople()
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (!tripId) {
+      window.location.href = '/organizer/login'
+      return
+    }
+    fetchPeople(tripId)
   }, [])
 
-  async function fetchPeople() {
-    const res = await fetch(buildApiUrl('/api/people'))
+  async function fetchPeople(tripId: string) {
+    const res = await fetch(buildApiUrl(`/api/people?trip_id=${tripId}`))
     const data = await res.json()
     setPeople(data)
     setLoading(false)
@@ -68,7 +73,9 @@ export default function PeoplePage() {
 
     resetForm()
     setShowForm(false)
-    fetchPeople()
+    setShowForm(false)
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (tripId) fetchPeople(tripId)
   }
 
   function startEdit(person: Person) {
@@ -95,7 +102,8 @@ export default function PeoplePage() {
     await fetch(`/api/people/${id}`, {
       method: 'DELETE',
     })
-    fetchPeople()
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (tripId) fetchPeople(tripId)
   }
 
   async function toggleConfirm(id: number, current: boolean) {
@@ -104,7 +112,8 @@ export default function PeoplePage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ is_confirmed: !current }),
     })
-    fetchPeople()
+    const tripId = localStorage.getItem('organizer_trip_id')
+    if (tripId) fetchPeople(tripId)
   }
 
   function handleCancel() {
@@ -310,11 +319,10 @@ export default function PeoplePage() {
               <div className="flex gap-2 flex-col ml-4">
                 <button
                   onClick={() => toggleConfirm(person.id, person.is_confirmed)}
-                  className={`px-3 py-1 rounded text-sm ${
-                    person.is_confirmed
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-gray-100 text-gray-600'
-                  }`}
+                  className={`px-3 py-1 rounded text-sm ${person.is_confirmed
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-gray-100 text-gray-600'
+                    }`}
                 >
                   {person.is_confirmed ? '✓ 已確認' : '未確認'}
                 </button>
