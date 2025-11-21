@@ -132,6 +132,7 @@ export default function HomePage() {
               <h4 className="font-semibold text-gray-900 mb-2">一般用戶</h4>
               <ul className="space-y-2">
                 <li><a href="/" className="text-gray-600 hover:text-blue-600">首頁 (Dashboard)</a></li>
+                <li><a href="/guide" className="text-gray-600 hover:text-blue-600">使用教學</a></li>
                 <li><a href="/apply" className="text-gray-600 hover:text-blue-600">申請使用</a></li>
                 <li><a href="/view/page" className="text-gray-600 hover:text-blue-600">訪客唯讀模式</a></li>
               </ul>
