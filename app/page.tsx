@@ -55,11 +55,17 @@ export default function HomePage() {
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-blue-800">關於本系統</h3>
                 <div className="mt-2 text-sm text-blue-700">
-                  <p>
-                    這是一個專為滑雪團設計的協作工具，解決分組、交通、餐飲等協調痛點。<br />
-                    目前下方顯示的是 <strong>{tripSettings?.trip_name || 'James 的滑雪團'}</strong> 的實際運作畫面。
-                    如果您也想為您的滑雪團建立一樣的系統，請點擊上方「申請使用」。
-                  </p>
+                  <div className="space-y-2">
+                    <p>這是一個專為滑雪團設計的協作工具，解決分組、交通、餐飲等協調痛點。</p>
+                    <div className="mt-2 p-3 bg-blue-100 rounded-md text-blue-900">
+                      <p className="font-bold mb-1">👇 您可以這樣開始：</p>
+                      <ul className="list-disc list-inside space-y-1 pl-1">
+                        <li><strong>體驗功能</strong>：下方是實際運作中的範例行程，您可以隨意瀏覽。</li>
+                        <li><strong>了解更多</strong>：點擊上方「申請使用」，內有完整的 <span className="underline">系統功能介紹</span>。</li>
+                        <li><strong>立即開團</strong>：如果您是團主，請直接申請建立您的專屬行程。</li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
