@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { TripSettings } from '@/lib/types'
 
 export default function ParticipantHomePage() {
@@ -13,7 +14,9 @@ export default function ParticipantHomePage() {
 
   async function fetchTripSettings() {
     try {
-      const res = await fetch('/api/trip-settings')
+      // 使用環境變數中的 trip_id，確保與首頁邏輯一致
+      const tripId = process.env.NEXT_PUBLIC_DEMO_TRIP_ID || '1'
+      const res = await fetch(`/api/trip-settings?trip_id=${tripId}`)
       const data = await res.json()
       setTripSettings(data)
     } catch (err) {
@@ -73,7 +76,7 @@ export default function ParticipantHomePage() {
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
           <h2 className="text-2xl font-bold mb-6 text-gray-800">📋 行程資訊</h2>
           <div className="grid md:grid-cols-2 gap-4">
-            <a
+            <Link
               href="/view/people"
               className="group p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg hover:shadow-md transition-all border-2 border-transparent hover:border-blue-300"
             >
@@ -86,9 +89,9 @@ export default function ParticipantHomePage() {
                   <p className="text-sm text-gray-600">查看所有參加者資訊</p>
                 </div>
               </div>
-            </a>
+            </Link>
 
-            <a
+            <Link
               href="/view/groups"
               className="group p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-lg hover:shadow-md transition-all border-2 border-transparent hover:border-green-300"
             >
@@ -101,9 +104,9 @@ export default function ParticipantHomePage() {
                   <p className="text-sm text-gray-600">查看每日分組安排</p>
                 </div>
               </div>
-            </a>
+            </Link>
 
-            <a
+            <Link
               href="/view/announcements"
               className="group p-6 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg hover:shadow-md transition-all border-2 border-transparent hover:border-yellow-300"
             >
@@ -116,9 +119,9 @@ export default function ParticipantHomePage() {
                   <p className="text-sm text-gray-600">重要通知與提醒</p>
                 </div>
               </div>
-            </a>
+            </Link>
 
-            <a
+            <Link
               href="/view/meals"
               className="group p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg hover:shadow-md transition-all border-2 border-transparent hover:border-purple-300"
             >
@@ -131,9 +134,9 @@ export default function ParticipantHomePage() {
                   <p className="text-sm text-gray-600">每日用餐時間地點</p>
                 </div>
               </div>
-            </a>
+            </Link>
 
-            <a
+            <Link
               href="/view/transport"
               className="group p-6 bg-gradient-to-br from-red-50 to-red-100 rounded-lg hover:shadow-md transition-all border-2 border-transparent hover:border-red-300"
             >
@@ -146,9 +149,9 @@ export default function ParticipantHomePage() {
                   <p className="text-sm text-gray-600">接送安排與車輛資訊</p>
                 </div>
               </div>
-            </a>
+            </Link>
 
-            <a
+            <Link
               href="/view/tasks"
               className="group p-6 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg hover:shadow-md transition-all border-2 border-transparent hover:border-indigo-300"
             >
@@ -161,7 +164,7 @@ export default function ParticipantHomePage() {
                   <p className="text-sm text-gray-600">待辦事項與準備工作</p>
                 </div>
               </div>
-            </a>
+            </Link>
           </div>
         </div>
 

@@ -1,11 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { TripSettings } from '@/lib/types'
 
 export default function HomePage() {
   const [tripSettings, setTripSettings] = useState<TripSettings | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isSettingUp, setIsSettingUp] = useState(false)
 
   useEffect(() => {
     fetchTripSettings()
@@ -46,11 +48,7 @@ export default function HomePage() {
 
           <button
             onClick={async () => {
-              const btn = document.getElementById('setup-btn') as HTMLButtonElement
-              if (btn) {
-                btn.disabled = true
-                btn.innerText = '建立中...'
-              }
+              setIsSettingUp(true)
               try {
                 const res = await fetch('/api/admin/setup-demo', { method: 'POST' })
                 const result = await res.json()
@@ -62,12 +60,14 @@ export default function HomePage() {
                 }
               } catch (e) {
                 alert('系統錯誤')
+              } finally {
+                setIsSettingUp(false)
               }
             }}
-            id="setup-btn"
-            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition"
+            disabled={isSettingUp}
+            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-md font-medium transition"
           >
-            🚀 一鍵建立 Demo 資料
+            {isSettingUp ? '建立中...' : '🚀 一鍵建立 Demo 資料'}
           </button>
         </div>
       </div>
@@ -85,18 +85,18 @@ export default function HomePage() {
               <p className="text-sm text-gray-500">滑雪團行程協調系統 - 讓多人滑雪更簡單</p>
             </div>
             <div className="flex gap-3">
-              <a
+              <Link
                 href="/apply"
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 ✨ 申請使用
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/admin/login"
                 className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 🔐 管理員登入
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -142,46 +142,46 @@ export default function HomePage() {
         </div>
 
         <nav className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-          <a href="/trip-settings" className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 group">
+          <Link href="/trip-settings" className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 group">
             <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">⛷️</div>
             <h2 className="font-bold text-gray-900">行程設定</h2>
             <p className="text-xs text-gray-500 mt-1">基本資訊管理</p>
-          </a>
-          <a href="/people" className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 group">
+          </Link>
+          <Link href="/people" className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 group">
             <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">👥</div>
             <h2 className="font-bold text-gray-900">人員管理</h2>
             <p className="text-xs text-gray-500 mt-1">名單與親子關係</p>
-          </a>
-          <a href="/groups" className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 group">
+          </Link>
+          <Link href="/groups" className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 group">
             <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">🏂</div>
             <h2 className="font-bold text-gray-900">滑雪分組</h2>
             <p className="text-xs text-gray-500 mt-1">每日分組與教學</p>
-          </a>
-          <a href="/announcements" className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 group">
+          </Link>
+          <Link href="/announcements" className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 group">
             <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">📢</div>
             <h2 className="font-bold text-gray-900">公告系統</h2>
             <p className="text-xs text-gray-500 mt-1">發布重要通知</p>
-          </a>
-          <a href="/meals" className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 group">
+          </Link>
+          <Link href="/meals" className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 group">
             <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">🍽️</div>
             <h2 className="font-bold text-gray-900">餐飲安排</h2>
             <p className="text-xs text-gray-500 mt-1">餐廳與座位</p>
-          </a>
-          <a href="/transport" className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 group">
+          </Link>
+          <Link href="/transport" className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 group">
             <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">🚗</div>
             <h2 className="font-bold text-gray-900">交通協調</h2>
             <p className="text-xs text-gray-500 mt-1">車輛與接送</p>
-          </a>
-          <a href="/tasks" className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 group">
+          </Link>
+          <Link href="/tasks" className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 group">
             <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">✅</div>
             <h2 className="font-bold text-gray-900">任務清單</h2>
             <p className="text-xs text-gray-500 mt-1">待辦事項追蹤</p>
-          </a>
-          <a href="/view/page" className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-sm hover:shadow-md transition border border-blue-100 group">
+          </Link>
+          <Link href="/view/page" className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-sm hover:shadow-md transition border border-blue-100 group">
             <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">👀</div>
             <h2 className="font-bold text-blue-900">訪客視角</h2>
             <p className="text-xs text-blue-700 mt-1">預覽參加者看到的畫面</p>
-          </a>
+          </Link>
         </nav>
 
         {/* 3. Comprehensive Sitemap Footer */}
@@ -193,33 +193,33 @@ export default function HomePage() {
             <div>
               <h4 className="font-semibold text-gray-900 mb-2">一般用戶</h4>
               <ul className="space-y-2">
-                <li><a href="/" className="text-gray-600 hover:text-blue-600">首頁 (Dashboard)</a></li>
-                <li><a href="/apply" className="text-gray-600 hover:text-blue-600">申請使用</a></li>
-                <li><a href="/view/page" className="text-gray-600 hover:text-blue-600">訪客唯讀模式</a></li>
+                <li><Link href="/" className="text-gray-600 hover:text-blue-600">首頁 (Dashboard)</Link></li>
+                <li><Link href="/apply" className="text-gray-600 hover:text-blue-600">申請使用</Link></li>
+                <li><Link href="/view/page" className="text-gray-600 hover:text-blue-600">訪客唯讀模式</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold text-gray-900 mb-2">行程管理</h4>
               <ul className="space-y-2">
-                <li><a href="/trip-settings" className="text-gray-600 hover:text-blue-600">行程設定</a></li>
-                <li><a href="/people" className="text-gray-600 hover:text-blue-600">人員管理</a></li>
-                <li><a href="/groups" className="text-gray-600 hover:text-blue-600">滑雪分組</a></li>
+                <li><Link href="/trip-settings" className="text-gray-600 hover:text-blue-600">行程設定</Link></li>
+                <li><Link href="/people" className="text-gray-600 hover:text-blue-600">人員管理</Link></li>
+                <li><Link href="/groups" className="text-gray-600 hover:text-blue-600">滑雪分組</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold text-gray-900 mb-2">後勤協調</h4>
               <ul className="space-y-2">
-                <li><a href="/announcements" className="text-gray-600 hover:text-blue-600">公告</a></li>
-                <li><a href="/meals" className="text-gray-600 hover:text-blue-600">餐飲</a></li>
-                <li><a href="/transport" className="text-gray-600 hover:text-blue-600">交通</a></li>
-                <li><a href="/tasks" className="text-gray-600 hover:text-blue-600">任務</a></li>
+                <li><Link href="/announcements" className="text-gray-600 hover:text-blue-600">公告</Link></li>
+                <li><Link href="/meals" className="text-gray-600 hover:text-blue-600">餐飲</Link></li>
+                <li><Link href="/transport" className="text-gray-600 hover:text-blue-600">交通</Link></li>
+                <li><Link href="/tasks" className="text-gray-600 hover:text-blue-600">任務</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold text-gray-900 mb-2">系統管理</h4>
               <ul className="space-y-2">
-                <li><a href="/admin/login" className="text-gray-600 hover:text-blue-600">Super Admin 登入</a></li>
-                <li><a href="/admin/trips" className="text-gray-600 hover:text-blue-600">所有行程列表</a></li>
+                <li><Link href="/admin/login" className="text-gray-600 hover:text-blue-600">Super Admin 登入</Link></li>
+                <li><Link href="/admin/trips" className="text-gray-600 hover:text-blue-600">所有行程列表</Link></li>
               </ul>
             </div>
           </div>
