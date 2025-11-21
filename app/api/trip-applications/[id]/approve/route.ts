@@ -59,7 +59,26 @@ export async function POST(
       return NextResponse.json({ error: '建立 trip 失敗' }, { status: 500 })
     }
 
-    // 4. 更新申請狀態
+    // 4. 建立 trip_settings（預設值 + 密碼）
+    const { error: settingsError } = await supabaseAdmin
+      .from('trip_settings')
+      .insert([
+        {
+          trip_id: newTrip.id,
+          trip_name: application.trip_name,
+          password: '123456', // 預設密碼
+          start_date: new Date().toISOString().split('T')[0],
+          end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7天後
+          location: '待設定',
+        },
+      ])
+
+    if (settingsError) {
+      console.error('建立 trip_settings 錯誤:', settingsError.message)
+      // trip 已建立，但 settings 失敗，不阻擋流程，只記錄錯誤
+    }
+
+    // 5. 更新申請狀態
     const { error: updateError } = await supabaseAdmin
       .from('trip_applications')
       .update({
