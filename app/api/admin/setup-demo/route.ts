@@ -9,7 +9,49 @@ import { supabaseAdmin } from '@/lib/supabase'
  */
 export async function POST(request: Request) {
     try {
-        // 1. 檢查是否已存在 Demo Trip
+        // 0. 特殊處理：如果環境變數指定了 ID，我們先檢查該 ID 是否存在且有資料
+        const targetId = process.env.NEXT_PUBLIC_DEMO_TRIP_ID ? parseInt(process.env.NEXT_PUBLIC_DEMO_TRIP_ID) : null
+
+        if (targetId) {
+            const { data: targetTrip } = await supabaseAdmin
+                .from('trips')
+                .select('id')
+                .eq('id', targetId)
+                .single()
+
+            if (!targetTrip) {
+                // 如果指定了 ID 但資料庫沒有，我們嘗試用這個 ID 建立 (如果 DB 允許手動插入 ID)
+                // 注意：通常 SERIAL/IDENTITY 欄位不建議手動插入，但在這種修復場景下可能需要
+                // 這裡我們改為：建立新 Trip，並告訴使用者正確的 ID
+            } else {
+                // 如果 Trip 存在，檢查是否有 Settings
+                const { data: settings } = await supabaseAdmin
+                    .from('trip_settings')
+                    .select('id')
+                    .eq('trip_id', targetId)
+                    .single()
+
+                if (!settings) {
+                    // 補上缺少的 Settings
+                    await supabaseAdmin.from('trip_settings').insert([{
+                        trip_id: targetId,
+                        trip_name: '已修復的 Demo 行程',
+                        start_date: '2025-02-01',
+                        end_date: '2025-02-07',
+                        location: '北海道二世谷',
+                        description: '系統自動修復的資料'
+                    }])
+
+                    return NextResponse.json({
+                        success: true,
+                        message: `已修復 Trip ID ${targetId} 的資料`,
+                        instruction: '請重新整理頁面'
+                    })
+                }
+            }
+        }
+
+        // 1. 檢查是否已存在 Demo Trip (by slug)
         const { data: existingTrip } = await supabaseAdmin
             .from('trips')
             .select('id, trip_name, slug')
@@ -17,11 +59,33 @@ export async function POST(request: Request) {
             .single()
 
         if (existingTrip) {
+            // 如果已存在，但 ID 不符，我們應該提示使用者更新環境變數
+            // 或者，如果使用者堅持要用 ID 5，我們可以考慮強制更新 existingTrip 的 ID (這在 SQL 很危險)
+            // 
+            // 更好的做法：檢查是否已經有 trip_settings
+            const { data: settings } = await supabaseAdmin
+                .from('trip_settings')
+                .select('id')
+                .eq('trip_id', existingTrip.id)
+                .single()
+
+            if (!settings) {
+                // 如果有 Trip 但沒 Settings，補上 Settings
+                await supabaseAdmin.from('trip_settings').insert([{
+                    trip_id: existingTrip.id,
+                    trip_name: existingTrip.trip_name,
+                    start_date: '2025-02-01',
+                    end_date: '2025-02-07',
+                    location: '北海道二世谷',
+                    description: '這是系統示範用的範例行程，展示所有功能運作'
+                }])
+            }
+
             return NextResponse.json({
                 success: true,
                 message: 'Demo Trip 已存在',
                 trip: existingTrip,
-                instruction: `請在 Zeabur 環境變數中設定: NEXT_PUBLIC_DEMO_TRIP_ID=${existingTrip.id}`
+                instruction: `請確認 Zeabur 環境變數 NEXT_PUBLIC_DEMO_TRIP_ID=${existingTrip.id} (目前設定為: ${process.env.NEXT_PUBLIC_DEMO_TRIP_ID})`
             })
         }
 
