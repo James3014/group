@@ -73,95 +73,95 @@ export default function ParticipantHomePage() {
         </div>
 
         {/* 功能導航 */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <h2 className="text-2xl font-bold mb-6 text-gray-800">📋 行程資訊</h2>
-          <div className="grid md:grid-cols-2 gap-4">
+        <div className="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-8">
+          <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 text-gray-800">📋 行程資訊</h2>
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-4">
             <Link
               href="/view/people"
-              className="group p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg hover:shadow-md transition-all border-2 border-transparent hover:border-blue-300"
+              className="group p-4 md:p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg hover:shadow-md transition-all"
             >
-              <div className="flex items-center gap-4">
-                <div className="text-4xl">👥</div>
+              <div className="flex flex-col md:flex-row items-center md:gap-4 text-center md:text-left">
+                <div className="text-3xl md:text-4xl mb-2 md:mb-0">👥</div>
                 <div>
-                  <h3 className="font-bold text-lg text-gray-900 group-hover:text-blue-600">
-                    參加人員名單
+                  <h3 className="font-bold text-base md:text-lg text-gray-900 group-hover:text-blue-600">
+                    參加人員
                   </h3>
-                  <p className="text-sm text-gray-600">查看所有參加者資訊</p>
+                  <p className="text-xs md:text-sm text-gray-600 hidden md:block">查看所有參加者資訊</p>
                 </div>
               </div>
             </Link>
 
             <Link
               href="/view/groups"
-              className="group p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-lg hover:shadow-md transition-all border-2 border-transparent hover:border-green-300"
+              className="group p-4 md:p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-lg hover:shadow-md transition-all"
             >
-              <div className="flex items-center gap-4">
-                <div className="text-4xl">🏂</div>
+              <div className="flex flex-col md:flex-row items-center md:gap-4 text-center md:text-left">
+                <div className="text-3xl md:text-4xl mb-2 md:mb-0">🏂</div>
                 <div>
-                  <h3 className="font-bold text-lg text-gray-900 group-hover:text-green-600">
+                  <h3 className="font-bold text-base md:text-lg text-gray-900 group-hover:text-green-600">
                     滑雪分組
                   </h3>
-                  <p className="text-sm text-gray-600">查看每日分組安排</p>
+                  <p className="text-xs md:text-sm text-gray-600 hidden md:block">查看每日分組安排</p>
                 </div>
               </div>
             </Link>
 
             <Link
               href="/view/announcements"
-              className="group p-6 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg hover:shadow-md transition-all border-2 border-transparent hover:border-yellow-300"
+              className="group p-4 md:p-6 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg hover:shadow-md transition-all"
             >
-              <div className="flex items-center gap-4">
-                <div className="text-4xl">📢</div>
+              <div className="flex flex-col md:flex-row items-center md:gap-4 text-center md:text-left">
+                <div className="text-3xl md:text-4xl mb-2 md:mb-0">📢</div>
                 <div>
-                  <h3 className="font-bold text-lg text-gray-900 group-hover:text-yellow-600">
+                  <h3 className="font-bold text-base md:text-lg text-gray-900 group-hover:text-yellow-600">
                     公告事項
                   </h3>
-                  <p className="text-sm text-gray-600">重要通知與提醒</p>
+                  <p className="text-xs md:text-sm text-gray-600 hidden md:block">重要通知與提醒</p>
                 </div>
               </div>
             </Link>
 
             <Link
               href="/view/meals"
-              className="group p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg hover:shadow-md transition-all border-2 border-transparent hover:border-purple-300"
+              className="group p-4 md:p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg hover:shadow-md transition-all"
             >
-              <div className="flex items-center gap-4">
-                <div className="text-4xl">🍽️</div>
+              <div className="flex flex-col md:flex-row items-center md:gap-4 text-center md:text-left">
+                <div className="text-3xl md:text-4xl mb-2 md:mb-0">🍽️</div>
                 <div>
-                  <h3 className="font-bold text-lg text-gray-900 group-hover:text-purple-600">
+                  <h3 className="font-bold text-base md:text-lg text-gray-900 group-hover:text-purple-600">
                     餐飲安排
                   </h3>
-                  <p className="text-sm text-gray-600">每日用餐時間地點</p>
+                  <p className="text-xs md:text-sm text-gray-600 hidden md:block">每日用餐時間地點</p>
                 </div>
               </div>
             </Link>
 
             <Link
               href="/view/transport"
-              className="group p-6 bg-gradient-to-br from-red-50 to-red-100 rounded-lg hover:shadow-md transition-all border-2 border-transparent hover:border-red-300"
+              className="group p-4 md:p-6 bg-gradient-to-br from-red-50 to-red-100 rounded-lg hover:shadow-md transition-all"
             >
-              <div className="flex items-center gap-4">
-                <div className="text-4xl">🚗</div>
+              <div className="flex flex-col md:flex-row items-center md:gap-4 text-center md:text-left">
+                <div className="text-3xl md:text-4xl mb-2 md:mb-0">🚗</div>
                 <div>
-                  <h3 className="font-bold text-lg text-gray-900 group-hover:text-red-600">
+                  <h3 className="font-bold text-base md:text-lg text-gray-900 group-hover:text-red-600">
                     交通協調
                   </h3>
-                  <p className="text-sm text-gray-600">接送安排與車輛資訊</p>
+                  <p className="text-xs md:text-sm text-gray-600 hidden md:block">接送安排與車輛資訊</p>
                 </div>
               </div>
             </Link>
 
             <Link
               href="/view/tasks"
-              className="group p-6 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg hover:shadow-md transition-all border-2 border-transparent hover:border-indigo-300"
+              className="group p-4 md:p-6 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg hover:shadow-md transition-all"
             >
-              <div className="flex items-center gap-4">
-                <div className="text-4xl">✅</div>
+              <div className="flex flex-col md:flex-row items-center md:gap-4 text-center md:text-left">
+                <div className="text-3xl md:text-4xl mb-2 md:mb-0">✅</div>
                 <div>
-                  <h3 className="font-bold text-lg text-gray-900 group-hover:text-indigo-600">
+                  <h3 className="font-bold text-base md:text-lg text-gray-900 group-hover:text-indigo-600">
                     任務清單
                   </h3>
-                  <p className="text-sm text-gray-600">待辦事項與準備工作</p>
+                  <p className="text-xs md:text-sm text-gray-600 hidden md:block">待辦事項與準備工作</p>
                 </div>
               </div>
             </Link>
