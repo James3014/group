@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Person, SkiGroup, SkiSession } from '@/lib/types'
 
 export default function GroupsPage() {
@@ -9,6 +9,7 @@ export default function GroupsPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
+  const formRef = useRef<HTMLFormElement>(null)
 
   // 工作日期/時段（用於篩選和新增）
   const [workingDate, setWorkingDate] = useState<string>('')
@@ -19,6 +20,7 @@ export default function GroupsPage() {
     group_date: '',
     session: '' as SkiSession | '',
     notes: '',
+    member_ids: [] as number[],
   })
 
   useEffect(() => {
@@ -54,7 +56,8 @@ export default function GroupsPage() {
       name: '',
       group_date: workingDate,  // 自動帶入工作日期
       session: workingSession,   // 自動帶入工作時段
-      notes: ''
+      notes: '',
+      member_ids: [],
     })
     setEditingId(null)
   }
@@ -62,7 +65,10 @@ export default function GroupsPage() {
   function openNewGroupForm() {
     resetForm()
     setShowForm(true)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    // 使用 setTimeout 确保表单已渲染再滚动
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
   }
 
   function startEdit(group: SkiGroup) {
@@ -71,10 +77,14 @@ export default function GroupsPage() {
       group_date: group.group_date || '',
       session: group.session || '',
       notes: group.notes || '',
+      member_ids: group.member_ids || [],
     })
     setEditingId(group.id)
     setShowForm(true)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    // 使用 setTimeout 确保表单已渲染再滚动
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
   }
 
   // 複製組別到其他日期/時段
@@ -350,7 +360,7 @@ export default function GroupsPage() {
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="mb-6 p-4 bg-white rounded-lg shadow border-2 border-blue-200">
+        <form ref={formRef} onSubmit={handleSubmit} className="mb-6 p-4 bg-white rounded-lg shadow border-2 border-blue-200">
           <div className="flex justify-between items-center mb-3">
             <h3 className="font-bold text-lg">{editingId ? '編輯分組' : '新增分組'}</h3>
             <button
@@ -405,6 +415,79 @@ export default function GroupsPage() {
               placeholder="集合地點、教練資訊等"
             />
           </div>
+
+          {/* 成員管理 */}
+          {editingId && (
+            <div className="mb-3 p-3 bg-gray-50 rounded border">
+              <label className="block mb-2 font-bold">組員管理</label>
+
+              {/* 當前成員列表 */}
+              {formData.member_ids.length > 0 ? (
+                <div className="mb-3 space-y-2">
+                  <p className="text-sm text-gray-600">目前成員 ({formData.member_ids.length} 人)：</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {formData.member_ids.map(personId => {
+                      const person = people.find(p => p.id === personId)
+                      if (!person) return null
+                      return (
+                        <div key={personId} className="flex items-center justify-between p-2 bg-white rounded border text-sm">
+                          <span>
+                            {person.name}
+                            {person.age_group === 'child' && ' 👶'}
+                            {person.has_radio && ' 📻'}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormData({
+                                ...formData,
+                                member_ids: formData.member_ids.filter(id => id !== personId)
+                              })
+                            }}
+                            className="text-red-600 hover:text-red-800 text-xs ml-2"
+                            title="移除"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400 mb-3">尚無成員</p>
+              )}
+
+              {/* 添加成員下拉選單 */}
+              {(() => {
+                const availablePeople = people.filter(p => !formData.member_ids.includes(p.id))
+                return availablePeople.length > 0 ? (
+                  <select
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        setFormData({
+                          ...formData,
+                          member_ids: [...formData.member_ids, parseInt(e.target.value)]
+                        })
+                        e.target.value = '' // 重置選擇
+                      }
+                    }}
+                    className="text-sm p-2 border rounded w-full"
+                  >
+                    <option value="">+ 添加成員...</option>
+                    {availablePeople.map(person => (
+                      <option key={person.id} value={person.id}>
+                        {person.name} ({person.ski_level === 'beginner' ? '初級' : person.ski_level === 'intermediate' ? '中級' : '高級'})
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <p className="text-sm text-gray-500">所有人員都已加入此組</p>
+                )
+              })()}
+            </div>
+          )}
+
           <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
             {editingId ? '更新' : '新增'}
           </button>
