@@ -293,7 +293,7 @@ export default function GroupsPage() {
   return (
     <div className="min-h-screen p-4 max-w-6xl mx-auto">
       <div className="mb-6">
-        <a href="/" className="text-blue-600 hover:underline mb-2 inline-block">← 返回首頁</a>
+        <a href="/organizer/dashboard" className="text-blue-600 hover:underline mb-2 inline-block">← 返回管理首頁</a>
         <div className="flex justify-between items-start mb-4">
           <div>
             <h1 className="text-3xl font-bold">🏂 滑雪分組</h1>

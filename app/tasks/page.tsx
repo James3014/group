@@ -85,7 +85,7 @@ export default function TasksPage() {
   return (
     <div className="min-h-screen p-4 max-w-4xl mx-auto">
       <div className="mb-6">
-        <a href="/" className="text-blue-600 hover:underline mb-2 inline-block">← 返回首頁</a>
+        <a href="/organizer/dashboard" className="text-blue-600 hover:underline mb-2 inline-block">← 返回管理首頁</a>
         <h1 className="text-3xl font-bold mb-2">✅ 任務清單</h1>
         <p className="text-gray-600">
           待辦：{pending.length} | 已完成：{completed.length}
