@@ -75,7 +75,9 @@ export async function POST(
 
     if (settingsError) {
       console.error('建立 trip_settings 錯誤:', settingsError.message)
-      // trip 已建立，但 settings 失敗，不阻擋流程，只記錄錯誤
+      // 回滾：刪除已建立的 trip
+      await supabaseAdmin.from('trips').delete().eq('id', newTrip.id)
+      return NextResponse.json({ error: '建立 trip_settings 失敗，請稍後再試' }, { status: 500 })
     }
 
     // 5. 更新申請狀態
